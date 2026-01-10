@@ -22,6 +22,8 @@ export class UserViewMenu {
 
   {text: "Child @For Directive", link: 'child-reg-table-for-directive'},
 
+  {text: "Child Reg. Datatable", link:'child-reg-datatable-show'}
+
 
 
 

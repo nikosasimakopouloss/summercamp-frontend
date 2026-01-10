@@ -6,6 +6,7 @@ import { ChildRegForm } from './components/child-reg-form/child-reg-form';
 import { ChildRegTable } from './components/child-reg-table/child-reg-table';
 import { ChildRegTableInput } from './components/child-reg-table-input/child-reg-table-input';
 import { ChildRegTableForDirective } from './components/child-reg-table-for-directive/child-reg-table-for-directive';
+import { ChildRegDatatableShow } from './components/child-reg-datatable-show/child-reg-datatable-show';
 
 export const routes: Routes = [
 
@@ -19,7 +20,9 @@ export const routes: Routes = [
  { path: 'child-reg-table', component: ChildRegTable},
  {path : 'child-reg-table-input' , component: ChildRegTableInput},
 
- {path:'child-reg-table-for-directive', component: ChildRegTableForDirective}
+ {path:'child-reg-table-for-directive', component: ChildRegTableForDirective},
+
+ {path: 'child-reg-datatable-show' , component: ChildRegDatatableShow }
 
 
 
