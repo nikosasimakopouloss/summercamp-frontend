@@ -1,0 +1,51 @@
+
+
+
+
+
+
+<div class="container-fluid">
+  <div class="row">
+    
+    <div class="col-md-4">
+      <div class="list-group">
+        @for (entry of menu; track entry){
+          <a class="list-group-item list-group-item-action text-wrap "
+             [routerLink]="entry.link"
+             [routerLinkActive]="['active']">
+            {{entry.text}}
+          </a>
+        }
+      </div>
+
+
+      </div>
+    
+    <div class="col-md-9 offset-md-5 ps-9">
+      <router-outlet></router-outlet>
+    </div>
+  
+  
+  
+  
+  
+  </div>
+</div>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

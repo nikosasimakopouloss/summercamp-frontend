@@ -13,7 +13,17 @@
   </mat-form-field>
 </form>
 
-<button mat-flat-button="outlined" color="primary" (click)="onSubmit()">Submit</button>
+<button mat-flat-button="outlined" color="primary" (click)="onSubmit(); goToUserViewMenu()">Submit</button>
+
+<div>
+<button mat-flat-button="outlined" color="primary" 
+(click)="goToCreateAccount()"
+
+
+>Don't have an accoount?</button>
+
+
+</div>
 
 
 

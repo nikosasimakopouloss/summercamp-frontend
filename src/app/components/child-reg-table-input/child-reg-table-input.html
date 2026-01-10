@@ -1,0 +1,22 @@
+
+@if (!child){
+  <div class="alert alert-danger text-center">No person details</div>
+} @else{
+  <table class="table table-bordered w-50">
+    <caption class="caption-top fw-bold bg-primary text-light text-center">
+      User Details from Step 3 Component
+    </caption>
+    <tr>
+      <td class="fw-semibold text-end">First Name</td>
+      <td class="ps-2">{{child.firstname}}</td>
+    </tr>
+    <tr>
+      <td class="fw-semibold text-end">Last Name</td>
+      <td class="ps-2">{{child.lastname}}</td>
+    </tr>
+    <tr>
+      <td class="fw-semibold text-end">Email</td>
+      <td class="ps-2">{{child.email}}</td>
+    </tr>
+  </table>
+}

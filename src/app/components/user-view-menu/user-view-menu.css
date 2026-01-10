@@ -1,0 +1,23 @@
+/* Fix for sidebar changing shape */
+.list-group-item {
+  min-width: 180px !important;  /* Fixed minimum width */
+  max-width: 180px !important;  /* Fixed maximum width */
+  white-space: normal;          /* Allow text wrapping */
+  min-height: 60px !important;  /* Fixed minimum height */
+  display: flex !important;     /* Use flexbox */
+  align-items: center !important; /* Center text vertically */
+  justify-content: center !important; /* Center text horizontally */
+  text-align: center;           /* Center text */
+  padding: 12px 15px !important; /* Consistent padding */
+}
+
+/* Keep active state styling but prevent size changes */
+.list-group-item.active {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+  /* Keep same dimensions as inactive */
+  min-width: 180px !important;
+  max-width: 180px !important;
+  min-height: 60px !important;
+}

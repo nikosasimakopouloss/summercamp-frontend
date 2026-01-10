@@ -1,5 +1,5 @@
 <div>
-  <h4>Create Account</h4>
+  <h4>Child Registration Form</h4>
 
    @if(registrationStatus.success){
     <div class="alert alert-success mt-2 w-50">
@@ -112,7 +112,7 @@
 <button
     mat-raised-button
     color="primary"
-    (click)="onSubmit(); goToLogInPage()"
+    (click)="onSubmit();"
     [disabled]="form.invalid"
   >
     Submit
@@ -121,3 +121,4 @@
 
   
 </div>
+

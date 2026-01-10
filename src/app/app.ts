@@ -9,7 +9,8 @@ import { CreateUser } from './components/create-user/create-user';
           RouterLink, 
           RouterOutlet, 
           LogInPage,
-          CreateUser
+          CreateUser,
+          
         
         ],
   templateUrl: './app.html',

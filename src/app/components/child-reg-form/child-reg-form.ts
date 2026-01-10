@@ -1,25 +1,18 @@
-import { Component, inject } from '@angular/core';
-// import { UserService } from '../../shared/services/user.service';
-import { 
-  FormArray, 
-  FormControl, 
-  FormGroup, 
-  AbstractControl, 
-  ReactiveFormsModule, 
-  Validators 
-} from '@angular/forms';
-import { MatSelect, MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatButtonModule } from '@angular/material/button';
-import {IUser} from '../../shared/interfaces/user';
+import { Component } from '@angular/core';
+import { IUser } from '../../shared/interfaces/user';
+import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink, RouterModule, RouterOutlet } from '@angular/router';
 
 @Component({
-  selector: 'create-user',
+  selector: 'app-child-reg-form',
   imports: [
-    CommonModule,
+
+CommonModule,
     ReactiveFormsModule,
     MatFormFieldModule,
     MatSelectModule,
@@ -28,12 +21,16 @@ import { Router, RouterLink, RouterModule, RouterOutlet } from '@angular/router'
     RouterLink,
     RouterOutlet,
     RouterModule
+
+
   ],
-  templateUrl: './create-user.html',
-  styleUrl: 'create-user.css',
+  templateUrl: './child-reg-form.html',
+  styleUrl: './child-reg-form.css'
 })
-export class CreateUser {
-  // userService = inject(UserService);
+export class ChildRegForm {
+
+
+// userService = inject(UserService);
 
   constructor(private router: Router) {}
 
@@ -106,14 +103,12 @@ addPhoneNumber(){
     const user = this.form.value as IUser
   }
 
-  goToLogInPage() {
-    this.router.navigate(['/log-in-page']);
-  }
-
-
-
-  } 
+  
 
 
 
 
+
+
+
+}
