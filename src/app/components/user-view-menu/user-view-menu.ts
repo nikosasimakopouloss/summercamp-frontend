@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { ChildRegForm } from '../child-reg-form/child-reg-form';
 
 @Component({
   selector: 'app-user-view-menu',
@@ -18,7 +17,12 @@ export class UserViewMenu {
 
   {text: "My Registrations", link: 'child-reg-table'},
 
-  {text: "My Registrations Input", link: 'child-reg-table-input'}
+  {text: "My Registrations Input", link: 'child-reg-table-input'},
+
+
+  {text: "Child @For Directive", link: 'child-reg-table-for-directive'},
+
+
 
 
   ]
