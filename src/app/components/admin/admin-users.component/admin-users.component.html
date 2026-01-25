@@ -1,0 +1,500 @@
+<div class="admin-users-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="title-section">
+      <h1>
+        <i class="fas fa-users-cog"></i> User Management
+      </h1>
+      <p class="subtitle">Manage parent and administrator accounts</p>
+    </div>
+    
+    <div class="actions">
+      <button 
+        class="btn btn-primary"
+        (click)="showAddUserForm()">
+        <i class="fas fa-user-plus"></i> Add User
+      </button>
+      
+      <button 
+        class="btn btn-outline"
+        (click)="exportToCSV()"
+        [disabled]="loading() || allUsers().length === 0">
+        <i class="fas fa-file-export"></i> Export CSV
+      </button>
+      
+      <button 
+        class="btn btn-outline"
+        (click)="refresh()"
+        [disabled]="loading()">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading()"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="success()" class="success-alert">
+    <div class="alert-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <div class="alert-content">
+      <p>{{ success() }}</p>
+    </div>
+    <button class="btn btn-sm btn-outline" (click)="success.set('')">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div *ngIf="error()" class="error-alert">
+    <div class="alert-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <div class="alert-content">
+      <h4>Error</h4>
+      <p>{{ error() }}</p>
+    </div>
+    <button class="btn btn-sm btn-outline" (click)="error.set('')">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-cards" *ngIf="!loading() && allUsers().length > 0">
+    <div class="stat-card total">
+      <div class="stat-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats().total }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+    </div>
+    
+    <div class="stat-card parents">
+      <div class="stat-icon">
+        <i class="fas fa-user-friends"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats().parents }}</div>
+        <div class="stat-label">Parents</div>
+      </div>
+    </div>
+    
+    <div class="stat-card admins">
+      <div class="stat-icon">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats().admins }}</div>
+        <div class="stat-label">Administrators</div>
+      </div>
+    </div>
+    
+    <div class="stat-card showing">
+      <div class="stat-icon">
+        <i class="fas fa-filter"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats().showing }}</div>
+        <div class="stat-label">Showing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <!-- <app-loading-spinner *ngIf="loading()"></app-loading-spinner> -->
+
+  <!-- Filter Bar -->
+  <div *ngIf="!loading() && allUsers().length > 0" class="filter-bar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="updateSearch($event)"
+        placeholder="Search by username, email, name, or AMKA..."
+        class="search-input">
+    </div>
+    
+    <div class="filter-controls">
+      <select 
+        [ngModel]="filterRole()"
+        (ngModelChange)="updateRoleFilter($event)"
+        class="filter-select">
+        <option value="">All Roles</option>
+        <option value="parent">Parents</option>
+        <option value="admin">Administrators</option>
+      </select>
+      
+      <div class="sort-controls">
+        <button 
+          class="btn-sort"
+          [class.active]="sortBy() === 'username'"
+          (click)="changeSort('username')">
+          <i class="fas fa-user"></i> Username
+          <i class="fas" [class.fa-sort-up]="sortAscending()" [class.fa-sort-down]="!sortAscending()"></i>
+        </button>
+        
+        <button 
+          class="btn-sort"
+          [class.active]="sortBy() === 'createdAt'"
+          (click)="changeSort('createdAt')">
+          <i class="fas fa-calendar-plus"></i> Created
+          <i class="fas" [class.fa-sort-up]="sortAscending()" [class.fa-sort-down]="!sortAscending()"></i>
+        </button>
+      </div>
+      
+      <button 
+        class="btn btn-outline"
+        (click)="clearFilters()"
+        *ngIf="searchTerm() || filterRole()">
+        <i class="fas fa-times"></i> Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Users Table -->
+  <div *ngIf="!loading() && allUsers().length > 0" class="users-table-container">
+    <div class="table-header">
+      <div class="header-info">
+        <span class="showing-count">{{ filteredUsers().length }} user(s) found</span>
+        <span *ngIf="filteredUsers().length !== allUsers().length" class="filtered-info">
+          (filtered from {{ allUsers().length }} total)
+        </span>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Contact</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Registrations</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filteredUsers()" [class.current-user]="user._id === currentUser()?._id">
+            <td class="user-cell">
+              <div class="user-avatar">{{ user.username?.charAt(0) || '?' }}</div>
+              <div class="user-details">
+                <div class="username">
+                  <strong>{{ user.username }}</strong>
+                  <span *ngIf="user._id === currentUser()?._id" class="you-badge">You</span>
+                </div>
+                <div class="full-name">{{ user.firstname }} {{ user.lastname }}</div>
+                <div class="user-id">ID: {{ user._id?.substring(0, 8) }}...</div>
+              </div>
+            </td>
+            
+            <td class="contact-cell">
+              <div class="contact-info">
+                <div class="email">
+                  <i class="fas fa-envelope"></i> {{ user.email || 'N/A' }}
+                </div>
+                <div class="amka">
+                  <i class="fas fa-id-card"></i> {{ user.amka || 'N/A' }}
+                </div>
+              </div>
+            </td>
+            
+            <td>
+              <span class="badge" [ngClass]="getRoleBadgeClass(user.roles)">
+                {{ getRoleText(user.roles) }}
+              </span>
+            </td>
+            
+            <!-- <td>
+              <span class="badge" [ngClass]="getStatusBadgeClass(user.isActive)">
+                {{ getStatusText(user.isActive) }}
+              </span>
+            </td> -->
+            
+            <td class="stats-cell">
+              <div class="stats-info">
+                <div class="stat-item">
+                  <i class="fas fa-calendar-alt"></i>
+                  {{ getUserRegistrationsCount(user._id!) }}
+                </div>
+                <div class="stat-item">
+                  <i class="fas fa-child"></i>
+                  {{ getUserCampersCount(user._id!) }}
+                </div>
+              </div>
+            </td>
+            
+            <td>
+              {{ user.createdAt | date:'mediumDate' }}
+            </td>
+            
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button 
+                  class="btn-icon btn-view"
+                  (click)="viewUserDetails(user)"
+                  title="View Details">
+                  <i class="fas fa-eye"></i>
+                </button>
+                
+                <button 
+                  class="btn-icon btn-edit"
+                  (click)="showEditUserForm(user)"
+                  [disabled]="!canModifyUser(user)"
+                  title="Edit User">
+                  <i class="fas fa-edit"></i>
+                </button>
+                
+                <!-- <button 
+                  class="btn-icon btn-status"
+                  (click)="toggleUserStatus(user)"
+                  [disabled]="!canModifyUser(user)"
+                  [title]="user.isActive ? 'Deactivate User' : 'Activate User'">
+                  <i class="fas" [class.fa-user-slash]="user.isActive" [class.fa-user-check]="!user.isActive"></i>
+                </button> -->
+                
+                <button 
+                  class="btn-icon btn-delete"
+                  (click)="deleteUser(user)"
+                  [disabled]="!canModifyUser(user)"
+                  title="Delete User">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Empty Filter Results -->
+    <div *ngIf="filteredUsers().length === 0" class="empty-filter">
+      <i class="fas fa-search"></i>
+      <h4>No users found</h4>
+      <p>Try adjusting your search or filters</p>
+      <button class="btn btn-outline" (click)="clearFilters()">
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty State (no users at all) -->
+  <div *ngIf="!loading() && allUsers().length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-users-slash"></i>
+    </div>
+    <h3>No Users Found</h3>
+    <p>There are no users in the system yet.</p>
+    <button class="btn btn-primary" (click)="showAddUserForm()">
+      <i class="fas fa-user-plus"></i> Add First User
+    </button>
+  </div>
+</div>
+
+<!-- User Form Modal -->
+<div *ngIf="showUserForm()" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>
+        <i class="fas" [class.fa-user-plus]="!isEditMode()" [class.fa-user-edit]="isEditMode()"></i>
+        {{ isEditMode() ? 'Edit User' : 'Add New User' }}
+      </h3>
+      <button class="btn-icon" (click)="closeUserForm()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <form [formGroup]="userForm" (ngSubmit)="onSubmitUser()" class="modal-form">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="username" class="required">Username</label>
+            <input
+              type="text"
+              id="username"
+              formControlName="username"
+              placeholder="Username"
+              [class.is-invalid]="username?.invalid && (username?.dirty || username?.touched)">
+            
+            <div *ngIf="username?.invalid && (username?.dirty || username?.touched)" class="invalid-feedback">
+              <div *ngIf="username?.errors?.['required']">Username is required</div>
+              <div *ngIf="username?.errors?.['minlength']">
+                Username must be at least {{ username?.errors?.['minlength']?.requiredLength }} characters
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="email" class="required">Email</label>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              placeholder="Email address"
+              [class.is-invalid]="email?.invalid && (email?.dirty || email?.touched)">
+            
+            <div *ngIf="email?.invalid && (email?.dirty || email?.touched)" class="invalid-feedback">
+              <div *ngIf="email?.errors?.['required']">Email is required</div>
+              <div *ngIf="email?.errors?.['email']">Please enter a valid email</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstname" class="required">First Name</label>
+            <input
+              type="text"
+              id="firstname"
+              formControlName="firstname"
+              placeholder="First name"
+              [class.is-invalid]="firstname?.invalid && (firstname?.dirty || firstname?.touched)">
+          </div>
+          
+          <div class="form-group">
+            <label for="lastname" class="required">Last Name</label>
+            <input
+              type="text"
+              id="lastname"
+              formControlName="lastname"
+              placeholder="Last name"
+              [class.is-invalid]="lastname?.invalid && (lastname?.dirty || lastname?.touched)">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="amka" class="required">AMKA</label>
+          <input
+            type="text"
+            id="amka"
+            formControlName="amka"
+            placeholder="11-digit AMKA"
+            [class.is-invalid]="amka?.invalid && (amka?.dirty || amka?.touched)">
+          
+          <div *ngIf="amka?.invalid && (amka?.dirty || amka?.touched)" class="invalid-feedback">
+            <div *ngIf="amka?.errors?.['required']">AMKA is required</div>
+            <div *ngIf="amka?.errors?.['pattern']">AMKA must be 11 digits</div>
+          </div>
+        </div>
+        
+        <div class="form-row" *ngIf="!isEditMode()">
+          <div class="form-group">
+            <label for="password" class="required">Password</label>
+            <input
+              type="password"
+              id="password"
+              formControlName="password"
+              placeholder="Password"
+              [class.is-invalid]="password?.invalid && (password?.dirty || password?.touched)">
+            
+            <div *ngIf="password?.invalid && (password?.dirty || password?.touched)" class="invalid-feedback">
+              <div *ngIf="password?.errors?.['required']">Password is required</div>
+              <div *ngIf="password?.errors?.['minlength']">
+                Password must be at least {{ password?.errors?.['minlength']?.requiredLength }} characters
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="confirmPassword" class="required">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              placeholder="Confirm password"
+              [class.is-invalid]="confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)">
+            
+            <div *ngIf="confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)" class="invalid-feedback">
+              <div *ngIf="confirmPassword?.errors?.['passwordMismatch']">Passwords do not match</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-row" *ngIf="isEditMode()">
+          <div class="form-group">
+            <label for="password">New Password (optional)</label>
+            <input
+              type="password"
+              id="password"
+              formControlName="password"
+              placeholder="Leave blank to keep current password"
+              [class.is-invalid]="password?.invalid && (password?.dirty || password?.touched)">
+            
+            <div *ngIf="password?.invalid && (password?.dirty || password?.touched)" class="invalid-feedback">
+              <div *ngIf="password?.errors?.['minlength']">
+                Password must be at least {{ password?.errors?.['minlength']?.requiredLength }} characters
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="confirmPassword">Confirm New Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              placeholder="Confirm new password"
+              [class.is-invalid]="confirmPassword?.invalid && (confirmPassword?.dirty || confirmPassword?.touched)">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="roles" class="required">Role</label>
+            <select
+              id="roles"
+              formControlName="roles"
+              [class.is-invalid]="roles?.invalid && (roles?.dirty || roles?.touched)"
+              multiple>
+              <option *ngFor="let role of roleOptions" [value]="role.value">
+                {{ role.label }}
+              </option>
+            </select>
+            
+            <small class="form-text">
+              <i class="fas fa-info-circle"></i> Hold Ctrl (or Cmd) to select multiple roles
+            </small>
+          </div>
+          
+          <div class="form-group checkbox-group">
+            <div class="checkbox-container">
+              <input
+                type="checkbox"
+                id="isActive"
+                formControlName="isActive">
+              <label for="isActive" class="checkbox-label">Active Account</label>
+            </div>
+            <small class="form-text">
+              <i class="fas fa-info-circle"></i> Inactive users cannot log in
+            </small>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-outline"
+          (click)="closeUserForm()"
+          [disabled]="saving()">
+          Cancel
+        </button>
+        
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="userForm.invalid || saving()">
+          <span *ngIf="saving()">
+            <i class="fas fa-spinner fa-spin"></i> Saving...
+          </span>
+          <span *ngIf="!saving()">
+            <i class="fas fa-save"></i>
+            {{ isEditMode() ? 'Update User' : 'Create User' }}
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,287 @@
+<div class="camper-list-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="title-section">
+      <h1>
+        <i class="fas fa-child"></i>
+        {{ isAdmin() ? 'All Campers' : 'My Campers' }}
+      </h1>
+      <p class="subtitle">
+        {{ isAdmin() ? 'Manage all campers in the system' : 'Manage your registered campers' }}
+      </p>
+    </div>
+    
+    <div class="actions">
+      <button 
+        class="btn btn-primary"
+        (click)="navigateToCreate()"
+        *ngIf="!isAdmin()">
+        <i class="fas fa-plus"></i> Add New Camper
+      </button>
+      
+      <div class="stats">
+        <span class="stat">
+          <i class="fas fa-users"></i>
+          Total: {{ campers().length }}
+        </span>
+        <span class="stat" *ngIf="filteredCampers().length !== campers().length">
+          <i class="fas fa-filter"></i>
+          Showing: {{ filteredCampers().length }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error()" class="error-alert">
+    <i class="fas fa-exclamation-triangle"></i>
+    {{ error() }}
+    <button class="btn btn-sm" (click)="loadCampers()">Retry</button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="updateSearch($event)"
+        placeholder="Search by name, AMKA, or info..."
+        class="search-input">
+    </div>
+    
+    <div class="filter-controls">
+      <select 
+        [ngModel]="filterByAge()"
+        (ngModelChange)="updateFilter($event)"
+        class="filter-select">
+        <option value="">All Types</option>
+        <option value="child">Children</option>
+        <option value="teen">Teens</option>
+        <option value="adult">Adults</option>
+      </select>
+      
+      <select 
+        [ngModel]="sortBy()"
+        (ngModelChange)="sortBy.set($event)"
+        class="sort-select">
+        <option value="name">Sort by Name</option>
+        <option value="age">Sort by Age</option>
+        <option value="dateAdded">Sort by Date Added</option>
+      </select>
+      
+      <button 
+        class="btn btn-secondary"
+        (click)="toggleSort()">
+        <i class="fas" [class.fa-sort-amount-up]="sortAscending()" [class.fa-sort-amount-down]="!sortAscending()"></i>
+        {{ sortAscending() ? 'Ascending' : 'Descending' }}
+      </button>
+      
+      <button 
+        class="btn btn-outline"
+        (click)="clearFilters()"
+        *ngIf="searchTerm() || filterByAge()">
+        <i class="fas fa-times"></i> Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <!-- <app-loading-spinner *ngIf="loading()"></app-loading-spinner> -->
+
+  <!-- Empty State -->
+  <div *ngIf="isEmpty()" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-child"></i>
+    </div>
+    <h3>{{ campers().length === 0 ? 'No Campers Found' : 'No Matching Campers' }}</h3>
+    <p>
+      {{ campers().length === 0 
+        ? (isAdmin() ? 'There are no campers registered in the system yet.' : 'You haven\'t registered any campers yet.') 
+        : 'No campers match your current filters.' }}
+    </p>
+    <button 
+      *ngIf="!isAdmin() && campers().length === 0"
+      class="btn btn-primary"
+      (click)="navigateToCreate()">
+      <i class="fas fa-plus"></i> Add Your First Camper
+    </button>
+  </div>
+
+  <!-- Campers Table -->
+  <div *ngIf="!loading() && !isEmpty()" class="table-container">
+    <table class="campers-table">
+      <thead>
+        <tr>
+          <th>Full Name</th>
+          <th>Age / Type</th>
+          <th>AMKA</th>
+          <th>Health Declaration</th>
+          <th *ngIf="isAdmin()">Parent/Guardian</th>
+          <th>Date Added</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let camper of paginatedCampers()">
+          <td class="name-cell">
+            <div class="avatar">{{ camper.fullName?.charAt(0) || '?' }}</div>
+            <div>
+              <strong>{{ camper.fullName || 'Unnamed' }}</strong>
+              <div class="additional-info" *ngIf="camper.additionalInfo">
+                {{ camper.additionalInfo }}
+              </div>
+            </div>
+          </td>
+          
+          <td>
+            <span class="badge" [ngClass]="{
+              'badge-child': camper.visitorType === 'child',
+              'badge-teen': camper.visitorType === 'teen',
+              'badge-adult': camper.visitorType === 'adult'
+            }">
+              {{ getAgeGroup(camper.dateOfBirth) }}
+            </span>
+            <div class="age">
+              {{ calculateAge(camper.dateOfBirth) }} years old
+            </div>
+          </td>
+          
+          <td class="amka-cell">
+            <code>{{ camper.amka || 'N/A' }}</code>
+          </td>
+          
+          <td>
+            <span class="health-status" [ngClass]="{
+              'status-approved': camper.healthDeclarationAccepted,
+              'status-pending': !camper.healthDeclarationAccepted
+            }">
+              <i class="fas" [class.fa-check-circle]="camper.healthDeclarationAccepted" [class.fa-times-circle]="!camper.healthDeclarationAccepted"></i>
+              {{ camper.healthDeclarationAccepted ? 'Accepted' : 'Pending' }}
+            </span>
+          </td>
+          
+          <td *ngIf="isAdmin()">
+            <!-- Admin view: Show parent ID -->
+            <span class="parent-info">User ID: {{ camper.parent }}</span>
+            <!-- In production, you might want to fetch and display parent name -->
+          </td>
+          
+          <td>
+            {{ camper.createdAt | date:'mediumDate' }}
+          </td>
+          
+          <td class="actions-cell">
+            <div class="action-buttons">
+              <button 
+                class="btn-icon btn-view"
+                (click)="viewCamper(camper._id)"
+                title="View Details">
+                <i class="fas fa-eye"></i>
+              </button>
+              
+              <button 
+                class="btn-icon btn-edit"
+                (click)="editCamper(camper._id)"
+                [disabled]="!canEditCamper(camper)"
+                title="Edit Camper">
+                <i class="fas fa-edit"></i>
+              </button>
+              
+              <button 
+                class="btn-icon btn-registrations"
+                (click)="navigateToRegistrations(camper._id)"
+                title="View Registrations">
+                <i class="fas fa-calendar-alt"></i>
+              </button>
+              
+              <button 
+                class="btn-icon btn-delete"
+                (click)="promptDelete(camper)"
+                [disabled]="!canDeleteCamper(camper)"
+                title="Delete Camper">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages() > 1">
+      <button 
+        class="btn btn-outline"
+        (click)="changePage(currentPage() - 1)"
+        [disabled]="currentPage() === 1">
+        <i class="fas fa-chevron-left"></i> Previous
+      </button>
+      
+      <div class="page-numbers">
+        <span class="page-info">
+          Page {{ currentPage() }} of {{ totalPages() }}
+        </span>
+        <select 
+          [ngModel]="currentPage()"
+          (ngModelChange)="changePage($event)"
+          class="page-select">
+          <option *ngFor="let page of [].constructor(totalPages()); let i = index" [value]="i + 1">
+            Page {{ i + 1 }}
+          </option>
+        </select>
+      </div>
+      
+      <button 
+        class="btn btn-outline"
+        (click)="changePage(currentPage() + 1)"
+        [disabled]="currentPage() === totalPages()">
+        Next <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Items per page selector -->
+  <div class="page-size-selector" *ngIf="!loading() && !isEmpty()">
+    <span>Show:</span>
+    <select [ngModel]="itemsPerPage()" (ngModelChange)="itemsPerPage.set($event); currentPage.set(1)">
+      <option [value]="5">5</option>
+      <option [value]="10">10</option>
+      <option [value]="25">25</option>
+      <option [value]="50">50</option>
+    </select>
+    <span>campers per page</span>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="showDeleteModal()" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Confirm Deletion</h3>
+      <button class="btn-icon" (click)="closeDeleteModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <p>
+        Are you sure you want to delete 
+        <strong>{{ selectedCamperForDelete()?.fullName }}</strong>?
+      </p>
+      <p class="warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        This action cannot be undone. All registrations for this camper will also be deleted.
+      </p>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-outline" (click)="closeDeleteModal()">
+        Cancel
+      </button>
+      <button class="btn btn-danger" (click)="confirmDelete()">
+        <i class="fas fa-trash"></i> Delete Camper
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,337 @@
+<div class="registration-form-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="back-nav">
+      <a routerLink="/registrations" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Registrations
+      </a>
+    </div>
+    
+    <div class="title-section">
+      <h1>
+        <i class="fas" [class.fa-calendar-plus]="!isEditMode()" [class.fa-calendar-check]="isEditMode()"></i>
+        {{ isEditMode() ? 'Edit Registration' : 'New Camp Registration' }}
+      </h1>
+      <p class="subtitle">
+        {{ isEditMode() ? 'Update camp registration details' : 'Register a camper for summer camp' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <p>{{ isEditMode() ? 'Loading registration data...' : 'Loading campers...' }}</p>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error() && !loading()" class="error-alert">
+    <div class="alert-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <div class="alert-content">
+      <h4>Error</h4>
+      <p>{{ error() }}</p>
+    </div>
+    <button class="btn btn-sm btn-outline" (click)="error.set('')">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- No Campers Warning -->
+  <div *ngIf="!loading() && campers().length === 0 && !isEditMode()" class="warning-alert">
+    <div class="alert-icon">
+      <i class="fas fa-exclamation-circle"></i>
+    </div>
+    <div class="alert-content">
+      <h4>No Campers Available</h4>
+      <p>You need to create a camper profile before registering for camp.</p>
+    </div>
+    <button class="btn btn-primary" routerLink="/campers/new">
+      <i class="fas fa-user-plus"></i> Create Camper
+    </button>
+  </div>
+
+  <!-- Form -->
+  <form *ngIf="!loading() && campers().length > 0" [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="registration-form">
+    
+    <!-- Camper Selection -->
+    <div class="form-section">
+      <h3><i class="fas fa-child"></i> Camper Information</h3>
+      
+      <div class="form-group">
+        <label for="camper" class="required">
+          <i class="fas fa-user"></i> Select Camper
+        </label>
+        <select
+          id="camper"
+          formControlName="camper"
+          [class.is-invalid]="camper?.invalid && (camper?.dirty || camper?.touched)"
+          [class.is-valid]="camper?.valid && (camper?.dirty || camper?.touched)"
+          [disabled]="isEditMode()">
+          <option value="" disabled>Select a camper...</option>
+          <option *ngFor="let camper of campers()" [value]="camper._id">
+            {{ camper.fullName }} ({{ getCamperAge(camper._id!) }} years old)
+          </option>
+        </select>
+        
+        <div *ngIf="camper?.invalid && (camper?.dirty || camper?.touched)" class="invalid-feedback">
+          <div *ngIf="camper?.errors?.['required']">Please select a camper</div>
+        </div>
+        
+        <div *ngIf="selectedCamper()" class="camper-details">
+          <div class="detail-item">
+            <span class="label">AMKA:</span>
+            <span class="value">{{ selectedCamper()?.amka }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Date of Birth:</span>
+            <span class="value">{{ selectedCamper()?.dateOfBirth | date:'mediumDate' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="label">Health Declaration:</span>
+            <span class="value" [class.status-approved]="selectedCamper()?.healthDeclarationAccepted" [class.status-pending]="!selectedCamper()?.healthDeclarationAccepted">
+              {{ selectedCamper()?.healthDeclarationAccepted ? 'Accepted ✓' : 'Pending ✗' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Camp Details -->
+    <div class="form-section">
+      <h3><i class="fas fa-campground"></i> Camp Details</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="campType" class="required">
+            <i class="fas fa-tag"></i> Camp Type
+          </label>
+          <select
+            id="campType"
+            formControlName="campType"
+            [class.is-invalid]="campType?.invalid && (campType?.dirty || campType?.touched)">
+            <option *ngFor="let type of campTypes()" [value]="type.value">
+              {{ type.label }}
+            </option>
+          </select>
+          
+          <div *ngIf="campType?.invalid && (campType?.dirty || campType?.touched)" class="invalid-feedback">
+            <div *ngIf="campType?.errors?.['required']">Camp type is required</div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="campPeriod" class="required">
+            <i class="fas fa-calendar-alt"></i> Camp Period
+          </label>
+          <select
+            id="campPeriod"
+            formControlName="campPeriod"
+            [class.is-invalid]="campPeriod?.invalid && (campPeriod?.dirty || campPeriod?.touched)">
+            <option value="" disabled>Select a period...</option>
+            <option *ngFor="let period of getFilteredCampPeriods()" [value]="period.value">
+              {{ period.label }}
+            </option>
+          </select>
+          
+          <div *ngIf="campPeriod?.invalid && (campPeriod?.dirty || campPeriod?.touched)" class="invalid-feedback">
+            <div *ngIf="campPeriod?.errors?.['required']">Please select a camp period</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Availability Warning -->
+      <div *ngIf="camper?.value && campPeriod?.value && !checkCamperAvailability()" class="warning-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        This camper already has a registration for the selected period.
+      </div>
+    </div>
+
+    <!-- Beneficiary Information -->
+    <div class="form-section">
+      <h3><i class="fas fa-user-check"></i> Beneficiary Information</h3>
+      
+      <div class="form-group">
+        <label for="beneficiary" class="required">
+          <i class="fas fa-user-circle"></i> Beneficiary Name
+        </label>
+        <input
+          type="text"
+          id="beneficiary"
+          formControlName="beneficiary"
+          placeholder="Full name of the camper attending camp"
+          [class.is-invalid]="beneficiary?.invalid && (beneficiary?.dirty || beneficiary?.touched)"
+          [class.is-valid]="beneficiary?.valid && (beneficiary?.dirty || beneficiary?.touched)">
+        
+        <div *ngIf="beneficiary?.invalid && (beneficiary?.dirty || beneficiary?.touched)" class="invalid-feedback">
+          <div *ngIf="beneficiary?.errors?.['required']">Beneficiary name is required</div>
+          <div *ngIf="beneficiary?.errors?.['minlength']">
+            Name must be at least {{ beneficiary?.errors?.['minlength']?.requiredLength }} characters
+          </div>
+          <div *ngIf="beneficiary?.errors?.['maxlength']">
+            Name cannot exceed {{ beneficiary?.errors?.['maxlength']?.requiredLength }} characters
+          </div>
+        </div>
+        
+        <small class="form-text">
+          <i class="fas fa-info-circle"></i> This should match the camper's full name
+        </small>
+      </div>
+    </div>
+
+    <!-- Parent Information -->
+    <div class="form-section">
+      <h3><i class="fas fa-users"></i> Parent/Guardian Information</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="motherName" class="required">
+            <i class="fas fa-female"></i> Mother's Name
+          </label>
+          <input
+            type="text"
+            id="motherName"
+            formControlName="motherName"
+            placeholder="Mother's full name"
+            [class.is-invalid]="motherName?.invalid && (motherName?.dirty || motherName?.touched)"
+            [class.is-valid]="motherName?.valid && (motherName?.dirty || motherName?.touched)">
+          
+          <div *ngIf="motherName?.invalid && (motherName?.dirty || motherName?.touched)" class="invalid-feedback">
+            <div *ngIf="motherName?.errors?.['required']">Mother's name is required</div>
+            <div *ngIf="motherName?.errors?.['minlength']">
+              Name must be at least {{ motherName?.errors?.['minlength']?.requiredLength }} characters
+            </div>
+            <div *ngIf="motherName?.errors?.['maxlength']">
+              Name cannot exceed {{ motherName?.errors?.['maxlength']?.requiredLength }} characters
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="fatherName" class="required">
+            <i class="fas fa-male"></i> Father's Name
+          </label>
+          <input
+            type="text"
+            id="fatherName"
+            formControlName="fatherName"
+            placeholder="Father's full name"
+            [class.is-invalid]="fatherName?.invalid && (fatherName?.dirty || fatherName?.touched)"
+            [class.is-valid]="fatherName?.valid && (fatherName?.dirty || fatherName?.touched)">
+          
+          <div *ngIf="fatherName?.invalid && (fatherName?.dirty || fatherName?.touched)" class="invalid-feedback">
+            <div *ngIf="fatherName?.errors?.['required']">Father's name is required</div>
+            <div *ngIf="fatherName?.errors?.['minlength']">
+              Name must be at least {{ fatherName?.errors?.['minlength']?.requiredLength }} characters
+            </div>
+            <div *ngIf="fatherName?.errors?.['maxlength']">
+              Name cannot exceed {{ fatherName?.errors?.['maxlength']?.requiredLength }} characters
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Information -->
+    <div class="form-section">
+      <h3><i class="fas fa-info-circle"></i> Additional Information</h3>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label for="socialSecurityFund">
+            <i class="fas fa-shield-alt"></i> Social Security Fund
+          </label>
+          <input
+            type="text"
+            id="socialSecurityFund"
+            formControlName="socialSecurityFund"
+            placeholder="e.g., IKA, OGA"
+            [class.is-invalid]="socialSecurityFund?.invalid && (socialSecurityFund?.dirty || socialSecurityFund?.touched)">
+          
+          <div *ngIf="socialSecurityFund?.invalid && (socialSecurityFund?.dirty || socialSecurityFund?.touched)" class="invalid-feedback">
+            <div *ngIf="socialSecurityFund?.errors?.['maxlength']">
+              Cannot exceed {{ socialSecurityFund?.errors?.['maxlength']?.requiredLength }} characters
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="registrationDate" class="required">
+            <i class="fas fa-calendar-day"></i> Registration Date
+          </label>
+          <input
+            type="date"
+            id="registrationDate"
+            formControlName="registrationDate"
+            [class.is-invalid]="registrationDate?.invalid && (registrationDate?.dirty || registrationDate?.touched)">
+          
+          <div *ngIf="registrationDate?.invalid && (registrationDate?.dirty || registrationDate?.touched)" class="invalid-feedback">
+            <div *ngIf="registrationDate?.errors?.['required']">Registration date is required</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="notes">
+          <i class="fas fa-sticky-note"></i> Additional Notes
+        </label>
+        <textarea
+          id="notes"
+          formControlName="notes"
+          placeholder="Any special requirements, dietary restrictions, medical notes, etc."
+          rows="3"
+          [class.is-invalid]="notes?.invalid && (notes?.dirty || notes?.touched)"></textarea>
+        
+        <div class="char-counter" *ngIf="notes?.value">
+          {{ notes?.value?.length || 0 }} / 500 characters
+        </div>
+        
+        <div *ngIf="notes?.invalid && (notes?.dirty || notes?.touched)" class="invalid-feedback">
+          <div *ngIf="notes?.errors?.['maxlength']">
+            Cannot exceed 500 characters
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group checkbox-group">
+        <div class="checkbox-container">
+          <input
+            type="checkbox"
+            id="isActive"
+            formControlName="isActive">
+          <label for="isActive" class="checkbox-label">
+            <i class="fas fa-toggle-on"></i> Active Registration
+          </label>
+        </div>
+        <small class="form-text">
+          <i class="fas fa-info-circle"></i> Uncheck to deactivate this registration (e.g., for cancellations)
+        </small>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="onCancel()"
+        [disabled]="saving()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+      
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="!isFormValid() || saving()">
+        <span *ngIf="saving()">
+          <i class="fas fa-spinner fa-spin"></i> Processing...
+        </span>
+        <span *ngIf="!saving()">
+          <i class="fas" [class.fa-save]="isEditMode()" [class.fa-check-circle]="!isEditMode()"></i>
+          {{ isEditMode() ? 'Update Registration' : 'Complete Registration' }}
+        </span>
+      </button>
+    </div>
+  </form>
+</div>

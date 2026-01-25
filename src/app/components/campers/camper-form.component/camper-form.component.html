@@ -1,0 +1,232 @@
+<div class="camper-form-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="back-nav">
+      <a routerLink="/campers" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Campers
+      </a>
+    </div>
+    
+    <div class="title-section">
+      <h1>
+        <i class="fas" [class.fa-user-plus]="!isEditMode()" [class.fa-user-edit]="isEditMode()"></i>
+        {{ isEditMode() ? 'Edit Camper' : 'Add New Camper' }}
+      </h1>
+      <p class="subtitle">
+        {{ isEditMode() ? 'Update camper information' : 'Register a new camper for summer camp' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading camper data...</p>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error() && !loading()" class="error-alert">
+    <div class="alert-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <div class="alert-content">
+      <h4>Error</h4>
+      <p>{{ error() }}</p>
+    </div>
+    <button class="btn btn-sm btn-outline" (click)="error.set('')">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Form -->
+  <form *ngIf="!loading()" [formGroup]="camperForm" (ngSubmit)="onSubmit()" class="camper-form">
+    
+    <!-- Full Name -->
+    <div class="form-group">
+      <label for="fullName" class="required">
+        <i class="fas fa-user"></i> Full Name
+      </label>
+      <input
+        type="text"
+        id="fullName"
+        formControlName="fullName"
+        placeholder="Enter camper's full name"
+        [class.is-invalid]="fullName?.invalid && (fullName?.dirty || fullName?.touched)"
+        [class.is-valid]="fullName?.valid && (fullName?.dirty || fullName?.touched)">
+      
+      <div *ngIf="fullName?.invalid && (fullName?.dirty || fullName?.touched)" class="invalid-feedback">
+        <div *ngIf="fullName?.errors?.['required']">Full name is required</div>
+        <div *ngIf="fullName?.errors?.['minlength']">
+          Name must be at least {{ fullName?.errors?.['minlength']?.requiredLength }} characters
+        </div>
+        <div *ngIf="fullName?.errors?.['maxlength']">
+          Name cannot exceed {{ fullName?.errors?.['maxlength']?.requiredLength }} characters
+        </div>
+      </div>
+    </div>
+
+    <!-- Date of Birth -->
+    <div class="form-group">
+      <label for="dateOfBirth" class="required">
+        <i class="fas fa-birthday-cake"></i> Date of Birth
+      </label>
+      <input
+        type="date"
+        id="dateOfBirth"
+        formControlName="dateOfBirth"
+        [max]="maxDate"
+        [min]="minDate"
+        [class.is-invalid]="dateOfBirth?.invalid && (dateOfBirth?.dirty || dateOfBirth?.touched)"
+        [class.is-valid]="dateOfBirth?.valid && (dateOfBirth?.dirty || dateOfBirth?.touched)">
+      
+      <div class="age-info" *ngIf="dateOfBirth?.value">
+        <span class="age-badge">{{ calculatedAge() }} years old</span>
+        <span class="age-group">{{ ageGroup() }}</span>
+      </div>
+      
+      <div *ngIf="dateOfBirth?.invalid && (dateOfBirth?.dirty || dateOfBirth?.touched)" class="invalid-feedback">
+        <div *ngIf="dateOfBirth?.errors?.['required']">Date of birth is required</div>
+        <div *ngIf="dateOfBirth?.errors?.['futureDate']">Date cannot be in the future</div>
+        <div *ngIf="dateOfBirth?.errors?.['invalidAge']">Please enter a valid date</div>
+      </div>
+    </div>
+
+    <!-- AMKA -->
+    <div class="form-group">
+      <label for="amka" class="required">
+        <i class="fas fa-id-card"></i> AMKA (Social Security Number)
+      </label>
+      <input
+        type="text"
+        id="amka"
+        formControlName="amka"
+        placeholder="Enter 11-digit AMKA"
+        [class.is-invalid]="amka?.invalid && (amka?.dirty || amka?.touched)"
+        [class.is-valid]="amka?.valid && (amka?.dirty || amka?.touched)"
+        [class]="getAmkaStatusClass()"
+        [readonly]="isEditMode()">
+      
+      <div class="amka-status" *ngIf="!isEditMode() && amka?.valid && amka?.value.length === 11">
+        <span [class]="'status ' + getAmkaStatusClass()">
+          <i class="fas" 
+             [class.fa-spinner]="amkaChecking()"
+             [class.fa-check-circle]="amkaAvailable() === true"
+             [class.fa-times-circle]="amkaAvailable() === false"></i>
+          {{ getAmkaStatusMessage() }}
+        </span>
+      </div>
+      
+      <div *ngIf="amka?.invalid && (amka?.dirty || amka?.touched)" class="invalid-feedback">
+        <div *ngIf="amka?.errors?.['required']">AMKA is required</div>
+        <div *ngIf="amka?.errors?.['pattern'] || amka?.errors?.['minlength'] || amka?.errors?.['maxlength']">
+          AMKA must be exactly 11 digits
+        </div>
+      </div>
+      
+      <small class="form-text">
+        <i class="fas fa-info-circle"></i> AMKA (Social Security Number) is required for registration
+      </small>
+    </div>
+
+    <!-- Visitor Type -->
+    <div class="form-group">
+      <label for="visitorType" class="required">
+        <i class="fas fa-user-tag"></i> Visitor Type
+      </label>
+      <select
+        id="visitorType"
+        formControlName="visitorType"
+        [class.is-invalid]="visitorType?.invalid && (visitorType?.dirty || visitorType?.touched)">
+        <option *ngFor="let type of visitorTypes" [value]="type.value">
+          {{ type.label }}
+        </option>
+      </select>
+      
+      <div *ngIf="visitorType?.invalid && (visitorType?.dirty || visitorType?.touched)" class="invalid-feedback">
+        <div *ngIf="visitorType?.errors?.['required']">Visitor type is required</div>
+      </div>
+      
+      <small class="form-text">
+        <i class="fas fa-info-circle"></i> Auto-selected based on age, but you can change if needed
+      </small>
+    </div>
+
+    <!-- Additional Info -->
+    <div class="form-group">
+      <label for="additionalInfo">
+        <i class="fas fa-file-alt"></i> Additional Information
+      </label>
+      <textarea
+        id="additionalInfo"
+        formControlName="additionalInfo"
+        placeholder="Any allergies, medical conditions, special requirements, etc."
+        rows="3"
+        [class.is-invalid]="additionalInfo?.invalid && (additionalInfo?.dirty || additionalInfo?.touched)"
+        [class.is-valid]="additionalInfo?.valid && (additionalInfo?.dirty || additionalInfo?.touched)"></textarea>
+      
+      <div class="char-counter" *ngIf="additionalInfo?.value">
+        {{ additionalInfo?.value?.length || 0 }} / 500 characters
+      </div>
+      
+      <div *ngIf="additionalInfo?.invalid && (additionalInfo?.dirty || additionalInfo?.touched)" class="invalid-feedback">
+        <div *ngIf="additionalInfo?.errors?.['maxlength']">
+          Cannot exceed 500 characters
+        </div>
+      </div>
+    </div>
+
+    <!-- Health Declaration -->
+    <div class="form-group health-declaration">
+      <div class="checkbox-container">
+        <input
+          type="checkbox"
+          id="healthDeclarationAccepted"
+          formControlName="healthDeclarationAccepted"
+          [class.is-invalid]="healthDeclarationAccepted?.invalid && (healthDeclarationAccepted?.dirty || healthDeclarationAccepted?.touched)">
+        <label for="healthDeclarationAccepted" class="required checkbox-label">
+          <i class="fas fa-heartbeat"></i> Health Declaration Acceptance
+        </label>
+      </div>
+      
+      <div class="declaration-text">
+        <p>I hereby declare that:</p>
+        <ul>
+          <li>The camper is in good health and able to participate in camp activities</li>
+          <li>I have disclosed all relevant medical information</li>
+          <li>I understand the camp's health and safety policies</li>
+          <li>I consent to emergency medical treatment if necessary</li>
+        </ul>
+      </div>
+      
+      <div *ngIf="healthDeclarationAccepted?.invalid && (healthDeclarationAccepted?.dirty || healthDeclarationAccepted?.touched)" class="invalid-feedback">
+        <div *ngIf="healthDeclarationAccepted?.errors?.['required']">
+          You must accept the health declaration
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="onCancel()"
+        [disabled]="saving()">
+        <i class="fas fa-times"></i> Cancel
+      </button>
+      
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="camperForm.invalid || saving() || (amkaAvailable() === false && !isEditMode())">
+        <span *ngIf="saving()">
+          <i class="fas fa-spinner fa-spin"></i> Saving...
+        </span>
+        <span *ngIf="!saving()">
+          <i class="fas" [class.fa-save]="isEditMode()" [class.fa-plus]="!isEditMode()"></i>
+          {{ isEditMode() ? 'Update Camper' : 'Create Camper' }}
+        </span>
+      </button>
+    </div>
+  </form>
+</div>

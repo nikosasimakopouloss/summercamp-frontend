@@ -1,32 +1,77 @@
 import { Routes } from '@angular/router';
-import { LogInPage } from './components/log-in-page/log-in-page';
-import { CreateUser } from './components/create-user/create-user';
-import { UserViewMenu } from './components/user-view-menu/user-view-menu';
-import { ChildRegForm } from './components/child-reg-form/child-reg-form';
-import { ChildRegTable } from './components/child-reg-table/child-reg-table';
-import { ChildRegTableInput } from './components/child-reg-table-input/child-reg-table-input';
-import { ChildRegTableForDirective } from './components/child-reg-table-for-directive/child-reg-table-for-directive';
-import { ChildRegDatatableShow } from './components/child-reg-datatable-show/child-reg-datatable-show';
+import { authGuard } from './shared/guards/auth-guard';
+import { adminRoleGuard } from './shared/guards/admin-role-guard';
 
 export const routes: Routes = [
-
-
-  { path: '', redirectTo: 'log-in-page', pathMatch: 'full' },
- {path:'log-in-page', component: LogInPage},
- {path:'create-user', component: CreateUser},
- {path: 'user-view-menu', component: UserViewMenu,
-  children: [
- { path: 'child-reg-form', component: ChildRegForm },
- { path: 'child-reg-table', component: ChildRegTable},
- {path : 'child-reg-table-input' , component: ChildRegTableInput},
-
- {path:'child-reg-table-for-directive', component: ChildRegTableForDirective},
-
- {path: 'child-reg-datatable-show' , component: ChildRegDatatableShow }
-
-
-
-  ]
-
-}
+  // Public routes
+  { 
+    path: 'login', 
+    loadComponent: () => import('./components/login.component/login.component').then(m => m.LoginComponent) 
+  },
+  { 
+    path: 'register', 
+    loadComponent: () => import('./components/register.component/register.component').then(m => m.RegisterComponent) 
+  },
+  
+  // Protected routes
+  { 
+    path: 'dashboard', 
+    loadComponent: () => import('./components/dashboard.component/dashboard.component').then(m => m.DashboardComponent),
+    canActivate: [authGuard],
+    children: [
+      // { 
+      //   path: '', 
+      //   loadComponent: () => import('./components/dashboard/overview/overview.component').then(m => m.OverviewComponent) 
+      // },
+      { 
+        path: 'profile', 
+        loadComponent: () => import('./components/profile.component/profile.component').then(m => m.ProfileComponent) 
+      },
+      { 
+        path: 'campers', 
+        loadComponent: () => import('./components/campers/camper-list.component/camper-list.component').then(m => m.CamperListComponent) 
+      },
+      { 
+        path: 'campers/new', 
+        loadComponent: () => import('./components/campers/camper-form.component/camper-form.component').then(m => m.CamperFormComponent) 
+      },
+      { 
+        path: 'campers/edit/:id', 
+        loadComponent: () => import('./components/campers/camper-form.component/camper-form.component').then(m => m.CamperFormComponent) 
+      },
+      { 
+        path: 'registrations', 
+        loadComponent: () => import('./components/registrations/registration-list.component/registration-list.component').then(m => m.RegistrationListComponent) 
+      },
+      { 
+        path: 'registrations/new', 
+        loadComponent: () => import('./components/registrations/registration-form.component/registration-form.component').then(m => m.RegistrationFormComponent) 
+      },
+      { 
+        path: 'registrations/edit/:id', 
+        loadComponent: () => import('./components/registrations/registration-form.component/registration-form.component').then(m => m.RegistrationFormComponent) 
+      },
+      
+      // Admin child routes
+      { 
+        path: 'admin/users', 
+        loadComponent: () => import('./components/admin/admin-users.component/admin-users.component').then(m => m.AdminUsersComponent),
+        canActivate: [adminRoleGuard]
+      },
+      { 
+        path: 'admin/campers', 
+        loadComponent: () => import('./components/admin/admin-campers.component/admin-campers.component').then(m => m.AdminCampersComponent),
+        canActivate: [adminRoleGuard]
+      },
+      { 
+        path: 'admin/registrations', 
+        loadComponent: () => import('./components/admin/admin-registrations.component/admin-registrations.component').then(m => m.AdminRegistrationsComponent),
+        canActivate: [adminRoleGuard]
+      }
+    ]
+  },
+  
+  // Default redirects
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '**', redirectTo: '/login' }
 ];

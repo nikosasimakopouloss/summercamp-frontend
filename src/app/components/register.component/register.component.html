@@ -1,0 +1,341 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <h2>Εγγραφή Νέου Χρήστη</h2>
+      <p>Δημιουργήστε λογαριασμό για να κάνετε εγγραφές στα κατασκηνώσεις</p>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <!-- Personal Information Section -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="bi bi-person-circle me-2"></i>
+          Προσωπικά Στοιχεία
+        </h3>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="firstname">Όνομα</label>
+              <input 
+                type="text" 
+                id="firstname"
+                formControlName="firstname" 
+                class="form-control"
+                placeholder="Εισάγετε το όνομά σας"
+              >
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="lastname">Επώνυμο</label>
+              <input 
+                type="text" 
+                id="lastname"
+                formControlName="lastname" 
+                class="form-control"
+                placeholder="Εισάγετε το επώνυμό σας"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="username">Όνομα Χρήστη *</label>
+          <input 
+            type="text" 
+            id="username"
+            formControlName="username" 
+            class="form-control"
+            [class.is-invalid]="registerForm.get('username')?.invalid && registerForm.get('username')?.touched"
+            placeholder="Εισάγετε όνομα χρήστη"
+          >
+          <div 
+            *ngIf="registerForm.get('username')?.invalid && registerForm.get('username')?.touched" 
+            class="invalid-feedback"
+          >
+            <div *ngIf="registerForm.get('username')?.errors?.['required']">
+              Απαιτείται όνομα χρήστη
+            </div>
+            <div *ngIf="registerForm.get('username')?.errors?.['minlength']">
+              Τουλάχιστον 3 χαρακτήρες
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="password">Κωδικός *</label>
+              <input 
+                type="password" 
+                id="password"
+                formControlName="password" 
+                class="form-control"
+                [class.is-invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+                placeholder="Εισάγετε κωδικό"
+              >
+              <div 
+                *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" 
+                class="invalid-feedback"
+              >
+                <div *ngIf="registerForm.get('password')?.errors?.['required']">
+                  Απαιτείται κωδικός
+                </div>
+                <div *ngIf="registerForm.get('password')?.errors?.['minlength']">
+                  Τουλάχιστον 6 χαρακτήρες
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="confirmPassword">Επιβεβαίωση Κωδικού *</label>
+              <input 
+                type="password" 
+                id="confirmPassword"
+                formControlName="confirmPassword" 
+                class="form-control"
+                [class.is-invalid]="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched"
+                placeholder="Εισάγετε ξανά τον κωδικό"
+              >
+              <div 
+                *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched" 
+                class="invalid-feedback"
+              >
+                <div *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">
+                  Απαιτείται επιβεβαίωση κωδικού
+                </div>
+                <div *ngIf="registerForm.get('confirmPassword')?.errors?.['mismatch']">
+                  Οι κωδικοί δεν ταιριάζουν
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="amka">ΑΜΚΑ *</label>
+              <input 
+                type="text" 
+                id="amka"
+                formControlName="amka" 
+                class="form-control"
+                [class.is-invalid]="registerForm.get('amka')?.invalid && registerForm.get('amka')?.touched"
+                (blur)="checkAmka()"
+                placeholder="Εισάγετε 11-ψήφιο ΑΜΚΑ"
+                maxlength="11"
+              >
+              <div 
+                *ngIf="registerForm.get('amka')?.invalid && registerForm.get('amka')?.touched" 
+                class="invalid-feedback"
+              >
+                <div *ngIf="registerForm.get('amka')?.errors?.['required']">
+                  Απαιτείται ΑΜΚΑ
+                </div>
+                <div *ngIf="registerForm.get('amka')?.errors?.['pattern']">
+                  Πρέπει να είναι 11 ψηφία
+                </div>
+                <div *ngIf="registerForm.get('amka')?.errors?.['taken']">
+                  Το ΑΜΚΑ χρησιμοποιείται ήδη
+                </div>
+              </div>
+              <small *ngIf="amkaChecking" class="text-info">
+                <i class="bi bi-arrow-repeat"></i> Έλεγχος διαθεσιμότητας...
+              </small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input 
+                type="email" 
+                id="email"
+                formControlName="email" 
+                class="form-control"
+                [class.is-invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+                placeholder="Εισάγετε email"
+              >
+              <div 
+                *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" 
+                class="invalid-feedback"
+              >
+                Μη έγκυρη διεύθυνση email
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Address Section -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="bi bi-house-door me-2"></i>
+          Διεύθυνση
+        </h3>
+        
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="area">Περιοχή</label>
+              <input 
+                type="text" 
+                id="area"
+                formControlName="area" 
+                class="form-control"
+                placeholder="Περιοχή"
+              >
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="street">Οδός</label>
+              <input 
+                type="text" 
+                id="street"
+                formControlName="street" 
+                class="form-control"
+                placeholder="Οδός"
+              >
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="number">Αριθμός</label>
+              <input 
+                type="text" 
+                id="number"
+                formControlName="number" 
+                class="form-control"
+                placeholder="Αριθμός"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="po">Ταχυδρομικός Κώδικας</label>
+              <input 
+                type="text" 
+                id="po"
+                formControlName="po" 
+                class="form-control"
+                placeholder="Τ.Κ."
+              >
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="municipality">Δήμος</label>
+              <input 
+                type="text" 
+                id="municipality"
+                formControlName="municipality" 
+                class="form-control"
+                placeholder="Δήμος"
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phones Section -->
+      <div class="form-section">
+        <h3 class="section-title">
+          <i class="bi bi-telephone me-2"></i>
+          Τηλέφωνα
+        </h3>
+        
+        <div formArrayName="phones">
+          <div *ngFor="let phone of phones.controls; let i = index" class="phone-row">
+            <div class="row align-items-end">
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label [for]="'phoneType' + i">Τύπος</label>
+                  <select 
+                    [id]="'phoneType' + i"
+                    [formControlName]="i" 
+                    class="form-control"
+                  >
+                    <option value="mobile">Κινητό</option>
+                    <option value="home">Σταθερό</option>
+                    <option value="work">Εργασίας</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-7">
+                <div class="form-group">
+                  <label [for]="'phoneNumber' + i">Αριθμός *</label>
+                  <input 
+                    type="text" 
+                    [id]="'phoneNumber' + i"
+                    [formControlName]="i" 
+                    class="form-control"
+                    placeholder="π.χ. 6931234567"
+                  >
+                  <div 
+                    *ngIf="phones.at(i).get('number')?.invalid && phones.at(i).get('number')?.touched" 
+                    class="invalid-feedback d-block"
+                  >
+                    <div *ngIf="phones.at(i).get('number')?.errors?.['required']">
+                      Απαιτείται αριθμός
+                    </div>
+                    <div *ngIf="phones.at(i).get('number')?.errors?.['pattern']">
+                      10 ψηφία χωρίς κενά
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2">
+                <button 
+                  type="button" 
+                  (click)="removePhone(i)" 
+                  class="btn btn-danger w-100"
+                  [disabled]="phones.length === 1"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button 
+          type="button" 
+          (click)="addPhone()" 
+          class="btn btn-outline-secondary mt-2"
+        >
+          <i class="bi bi-plus-circle me-2"></i>
+          Προσθήκη Τηλεφώνου
+        </button>
+      </div>
+
+      <div class="form-group mt-4">
+        <button 
+          type="submit" 
+          [disabled]="registerForm.invalid || userService.loading()" 
+          class="btn btn-primary w-100 btn-lg"
+        >
+          <span *ngIf="userService.loading()" class="spinner-border spinner-border-sm me-2"></span>
+          {{ userService.loading() ? 'Εγγραφή...' : 'Ολοκλήρωση Εγγραφής' }}
+        </button>
+      </div>
+      
+      <div *ngIf="userService.error()" class="alert alert-danger mt-3">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        {{ userService.error() }}
+      </div>
+    </form>
+    
+    <div class="register-footer">
+      <p class="text-center mb-0">
+        Έχετε ήδη λογαριασμό; 
+        <a routerLink="/login" class="login-link">Σύνδεση</a>
+      </p>
+    </div>
+  </div>
+</div>

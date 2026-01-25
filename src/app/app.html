@@ -1,36 +1,47 @@
-
-
-
-
-<!-- Step 2 Component -->
-<div class="container mt-4">
-    <h3>Welcome our Camp!</h3>
-    <div class="d-flex gap-5 text-nowrap">
-        
-      
-      <router-outlet></router-outlet>
-
-        
-        
+<!-- Public Header -->
+<header *ngIf="!isLoggedIn" class="public-header">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a routerLink="/" class="logo-link">
+        <i class="bi bi-tree-fill"></i>
+        <span>Summer Camp</span>
+      </a>
     </div>
-</div>
+    <div class="navbar-menu">
+      <a routerLink="/login" routerLinkActive="active">Σύνδεση</a>
+      <a routerLink="/register" routerLinkActive="active" class="btn-register">Εγγραφή</a>
+    </div>
+  </nav>
+</header>
 
+<!-- Main Content -->
+<main>
+  <router-outlet></router-outlet>
+</main>
 
-
-
-
-<!-- <div class="container mt-4">
-
-Don't have an account?
-
-  <div class="d-flex gap-5 text-nowrap" >
-    
-    <create-user></create-user>
-
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h5>
+        <i class="bi bi-tree-fill"></i>
+        Summer Camp Registration
+      </h5>
+      <p>Σύστημα διαχείρισης εγγραφών σε κατασκηνώσεις</p>
+    </div>
+    <div class="footer-section">
+      <h6>Επικοινωνία</h6>
+      <p><i class="bi bi-telephone"></i> 210 1234567</p>
+      <p><i class="bi bi-envelope"></i> info@summercamp.gr</p>
+    </div>
+    <div class="footer-section">
+      <h6>Χρήσιμοι Σύνδεσμοι</h6>
+      <a routerLink="/login">Σύνδεση</a>
+      <a routerLink="/register">Εγγραφή</a>
+      <a href="#" *ngIf="isLoggedIn" (click)="logout()">Αποσύνδεση</a>
+    </div>
   </div>
-
-
-
-</div>
- -->
-
+  <div class="footer-bottom">
+    <p>&copy; 2024 Summer Camp Registration. Με επιφύλαξη παντός δικαιώματος.</p>
+  </div>
+</footer>

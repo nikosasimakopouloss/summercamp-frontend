@@ -1,25 +1,29 @@
-import { Component, signal } from '@angular/core';
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { LogInPage } from './components/log-in-page/log-in-page';
-import { CreateUser } from './components/create-user/create-user';
+import { UserService } from './shared/services/user.service';
 
 @Component({
   selector: 'app-root',
-  imports: [
-          RouterLink, 
-          RouterOutlet, 
-          LogInPage,
-          CreateUser,
-          
-        
-        ],
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, RouterLink],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrls: ['./app.css']
 })
-export class App {
-  protected readonly title = signal('summercamp-frontend');
+export class AppComponent {
+  title = 'summer-camp-registration';
 
-public name = "Nikos"
+  get isLoggedIn() {
+    return this.userService.isLoggedIn();
+  }
 
+  get isAdmin() {
+    return this.userService.isAdmin();
+  }
 
+  constructor(private userService: UserService) {}
+
+  logout() {
+    this.userService.logoutUser();
+  }
 }

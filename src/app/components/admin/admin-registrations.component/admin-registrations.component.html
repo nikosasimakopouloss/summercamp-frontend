@@ -1,0 +1,342 @@
+<div class="admin-registrations-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="title-section">
+      <h1>
+        <i class="fas fa-calendar-alt"></i> All Camp Registrations
+      </h1>
+      <p class="subtitle">Manage all camp registrations in the system</p>
+    </div>
+    
+    <div class="actions">
+      <button 
+        class="btn btn-outline"
+        (click)="exportToCSV()"
+        [disabled]="loading() || allRegistrations().length === 0">
+        <i class="fas fa-file-export"></i> Export CSV
+      </button>
+      
+      <button 
+        class="btn btn-outline"
+        (click)="refresh()"
+        [disabled]="loading()">
+        <i class="fas fa-sync-alt" [class.fa-spin]="loading()"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-cards" *ngIf="!loading() && allRegistrations().length > 0">
+    <div class="stat-card total">
+      <div class="stat-icon">
+        <i class="fas fa-list"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats().total }}</div>
+        <div class="stat-label">Total Registrations</div>
+      </div>
+    </div>
+    
+    <div class="stat-card active">
+      <div class="stat-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats().active }}</div>
+        <div class="stat-label">Active</div>
+      </div>
+    </div>
+    
+    <div class="stat-card summer">
+      <div class="stat-icon">
+        <i class="fas fa-sun"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats().summer }}</div>
+        <div class="stat-label">Summer Camp</div>
+      </div>
+    </div>
+    
+    <div class="stat-card showing">
+      <div class="stat-icon">
+        <i class="fas fa-filter"></i>
+      </div>
+      <div class="stat-content">
+        <div class="stat-number">{{ stats().showing }}</div>
+        <div class="stat-label">Showing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error()" class="error-alert">
+    <div class="alert-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <div class="alert-content">
+      <h4>Error</h4>
+      <p>{{ error() }}</p>
+    </div>
+    <button class="btn btn-sm btn-outline" (click)="error.set('')">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading all registrations...</p>
+  </div>
+
+  <!-- Search and Filter Bar -->
+  <div *ngIf="!loading() && allRegistrations().length > 0" class="filter-section">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input
+        type="text"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="updateSearch($event)"
+        placeholder="Search by camper, parent, beneficiary, or notes..."
+        class="search-input">
+      <button 
+        *ngIf="searchTerm()"
+        class="btn-icon btn-clear-search"
+        (click)="clearSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    
+    <form [formGroup]="filterForm" class="filter-form">
+      <div class="filter-controls">
+        <div class="filter-group">
+          <label for="campType">Camp Type</label>
+          <select id="campType" formControlName="campType">
+            <option value="">All Types</option>
+            <option *ngFor="let type of campTypes()" [value]="type.value">
+              {{ type.label }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="status">Status</label>
+          <select id="status" formControlName="status">
+            <option *ngFor="let status of statusOptions()" [value]="status.value">
+              {{ status.label }}
+            </option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Registration Date</label>
+          <div class="date-range">
+            <input 
+              type="date" 
+              formControlName="start" 
+              placeholder="Start Date"
+              class="date-input">
+            <span class="date-separator">to</span>
+            <input 
+              type="date" 
+              formControlName="end" 
+              placeholder="End Date"
+              class="date-input">
+          </div>
+        </div>
+        
+        <button 
+          type="button"
+          class="btn btn-outline"
+          (click)="clearFilters()"
+          *ngIf="searchTerm() || filterForm.dirty">
+          <i class="fas fa-times"></i> Clear All
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && allRegistrations().length === 0" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-calendar-times"></i>
+    </div>
+    <h3>No Registrations Found</h3>
+    <p>There are no camp registrations in the system yet.</p>
+  </div>
+
+  <!-- Registrations Table -->
+  <div *ngIf="!loading() && allRegistrations().length > 0" class="table-container">
+    <div class="table-header">
+      <div class="header-info">
+        <span class="showing-count">{{ filteredRegistrations().length }} registration(s) found</span>
+        <span *ngIf="filteredRegistrations().length !== allRegistrations().length" class="filtered-info">
+          (filtered from {{ allRegistrations().length }} total)
+        </span>
+      </div>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="admin-registrations-table">
+        <thead>
+          <tr>
+            <th>Registration Details</th>
+            <th>Camper & Parent</th>
+            <th>Camp Info</th>
+            <th>Status</th>
+            <th>Timeline</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let registration of filteredRegistrations()">
+            <td class="details-cell">
+              <div class="registration-id">ID: {{ registration._id?.substring(0, 8) }}...</div>
+              <div class="beneficiary">
+                <strong>{{ registration.beneficiary }}</strong>
+              </div>
+              <div class="parents">
+                <span class="parent">
+                  <i class="fas fa-female"></i> {{ registration.motherName }}
+                </span>
+                <span class="parent">
+                  <i class="fas fa-male"></i> {{ registration.fatherName }}
+                </span>
+              </div>
+              <div class="registration-date">
+                <i class="fas fa-calendar-day"></i>
+                {{ registration.registrationDate | date:'mediumDate' }}
+              </div>
+              <div class="social-security" *ngIf="registration.socialSecurityFund">
+                <i class="fas fa-shield-alt"></i> {{ registration.socialSecurityFund }}
+              </div>
+            </td>
+            
+            <td class="camper-parent-cell">
+              <div class="camper-info">
+                <div class="avatar">{{ getCamperName(registration.camper).charAt(0) }}</div>
+                <div>
+                  <div class="camper-name">{{ getCamperName(registration.camper) }}</div>
+                  <div class="camper-age">{{ getCamperAge(registration.camper) }} years old</div>
+                </div>
+              </div>
+              
+              <div class="parent-info">
+                <div class="parent-label">
+                  <i class="fas fa-user"></i> Parent:
+                </div>
+                <div class="parent-name">{{ getUserName(registration.user) }}</div>
+                <div class="parent-id">User ID: {{ registration.user?.substring(0, 8) }}...</div>
+              </div>
+            </td>
+            
+            <td class="camp-info-cell">
+              <div class="camp-type">
+                <span class="badge" [ngClass]="getCampTypeBadgeClass(registration.campType)">
+                  {{ getCampTypeText(registration.campType) }}
+                </span>
+              </div>
+              
+              <div class="camp-period">
+                <i class="fas fa-calendar-alt"></i>
+                {{ formatCampPeriod(registration.campPeriod) }}
+              </div>
+              
+              <!-- <div class="camp-dates">
+                <div class="date-label">Duration:</div>
+                <div class="date-value">
+                  {{ getCampDuration(registration.campPeriod) }} days
+                </div>
+              </div> -->
+              
+              <div class="created-date" *ngIf="registration.createdAt">
+                <i class="far fa-clock"></i>
+                Created: {{ registration.createdAt | date:'shortDate' }}
+              </div>
+            </td>
+            
+            <td>
+              <span class="badge" [ngClass]="getStatusBadgeClass(registration.isActive)">
+                {{ getStatusText(registration.isActive) }}
+              </span>
+              
+              <button 
+                *ngIf="registration.isActive"
+                class="btn-status-toggle"
+                (click)="toggleRegistrationStatus(registration)"
+                [disabled]="saving()"
+                title="Deactivate Registration">
+                <i class="fas fa-toggle-on"></i>
+              </button>
+              
+              <button 
+                *ngIf="!registration.isActive"
+                class="btn-status-toggle"
+                (click)="toggleRegistrationStatus(registration)"
+                [disabled]="saving()"
+                title="Activate Registration">
+                <i class="fas fa-toggle-off"></i>
+              </button>
+            </td>
+            
+            <!-- <td>
+              <span class="badge" [ngClass]="getTimelineStatusClass(registration)">
+                {{ getTimelineStatusText(registration) }}
+              </span>
+              
+              <div class="timeline-dates">
+                <div *ngIf="isUpcoming(registration)" class="upcoming-info">
+                  <i class="fas fa-clock"></i> Starts in {{ getDaysUntilStart(registration.campPeriod) }} days
+                </div>
+                <div *ngIf="isInProgress(registration)" class="in-progress-info">
+                  <i class="fas fa-running"></i> Currently ongoing
+                </div>
+              </div>
+            </td> -->
+            
+            <td class="actions-cell">
+              <div class="action-buttons">
+                <button 
+                  class="btn-icon btn-view"
+                  (click)="viewRegistration(registration._id)"
+                  title="View Details">
+                  <i class="fas fa-eye"></i>
+                </button>
+                
+                <button 
+                  class="btn-icon btn-edit"
+                  (click)="editRegistration(registration._id)"
+                  title="Edit Registration">
+                  <i class="fas fa-edit"></i>
+                </button>
+                
+                <button 
+                  class="btn-icon btn-delete"
+                  (click)="deleteRegistration(registration)"
+                  title="Delete Registration">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+              
+              <div class="notes-preview" *ngIf="registration.notes">
+                <i class="fas fa-sticky-note"></i>
+                <span class="notes-text" [title]="registration.notes">
+                  {{ registration.notes }}
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Empty Filter Results -->
+    <div *ngIf="filteredRegistrations().length === 0" class="empty-filter">
+      <i class="fas fa-search"></i>
+      <h4>No registrations match your filters</h4>
+      <p>Try adjusting your search criteria</p>
+      <button class="btn btn-outline" (click)="clearFilters()">
+        Clear Filters
+      </button>
+    </div>
+  </div>
+</div>

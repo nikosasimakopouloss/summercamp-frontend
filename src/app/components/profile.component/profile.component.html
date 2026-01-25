@@ -1,0 +1,289 @@
+<div class="profile-container">
+  <div class="profile-header">
+    <h1>
+      <i class="bi bi-person-circle me-3"></i>
+      Προφίλ Χρήστη
+    </h1>
+    <p class="subtitle">Διαχειριστείτε τα προσωπικά σας στοιχεία</p>
+  </div>
+
+  <div class="profile-card">
+    <div class="card-header">
+      <h3>Προσωπικές Πληροφορίες</h3>
+      <button 
+        *ngIf="!isEditing" 
+        (click)="toggleEdit()" 
+        class="btn btn-edit"
+      >
+        <i class="bi bi-pencil-square me-2"></i>
+        Επεξεργασία
+      </button>
+    </div>
+
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+      <!-- Personal Info -->
+      <div class="form-section">
+        <h4 class="section-title">Βασικές Πληροφορίες</h4>
+        
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="username">Όνομα Χρήστη *</label>
+              <input 
+                type="text" 
+                id="username"
+                formControlName="username" 
+                class="form-control"
+                [class.is-invalid]="profileForm.get('username')?.invalid && profileForm.get('username')?.touched"
+              >
+              <div 
+                *ngIf="profileForm.get('username')?.invalid && profileForm.get('username')?.touched" 
+                class="invalid-feedback"
+              >
+                <div *ngIf="profileForm.get('username')?.errors?.['required']">
+                  Απαιτείται όνομα χρήστη
+                </div>
+                <div *ngIf="profileForm.get('username')?.errors?.['minlength']">
+                  Τουλάχιστον 3 χαρακτήρες
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="amka">ΑΜΚΑ</label>
+              <input 
+                type="text" 
+                id="amka"
+                formControlName="amka" 
+                class="form-control"
+                readonly
+              >
+              <small class="text-muted">Το ΑΜΚΑ δεν μπορεί να αλλάξει</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="firstname">Όνομα</label>
+              <input 
+                type="text" 
+                id="firstname"
+                formControlName="firstname" 
+                class="form-control"
+              >
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="lastname">Επώνυμο</label>
+              <input 
+                type="text" 
+                id="lastname"
+                formControlName="lastname" 
+                class="form-control"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input 
+            type="email" 
+            id="email"
+            formControlName="email" 
+            class="form-control"
+            [class.is-invalid]="profileForm.get('email')?.invalid && profileForm.get('email')?.touched"
+          >
+          <div 
+            *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched" 
+            class="invalid-feedback"
+          >
+            Μη έγκυρη διεύθυνση email
+          </div>
+        </div>
+      </div>
+
+      <!-- Address -->
+      <div class="form-section">
+        <h4 class="section-title">Διεύθυνση</h4>
+        
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="area">Περιοχή</label>
+              <input 
+                type="text" 
+                id="area"
+                formControlName="area" 
+                class="form-control"
+              >
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="street">Οδός</label>
+              <input 
+                type="text" 
+                id="street"
+                formControlName="street" 
+                class="form-control"
+              >
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="number">Αριθμός</label>
+              <input 
+                type="text" 
+                id="number"
+                formControlName="number" 
+                class="form-control"
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="po">Ταχυδρομικός Κώδικας</label>
+              <input 
+                type="text" 
+                id="po"
+                formControlName="po" 
+                class="form-control"
+              >
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="municipality">Δήμος</label>
+              <input 
+                type="text" 
+                id="municipality"
+                formControlName="municipality" 
+                class="form-control"
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phones -->
+      <div class="form-section">
+        <h4 class="section-title">Τηλέφωνα</h4>
+        
+        <div formArrayName="phones">
+          <div *ngFor="let phone of phones.controls; let i = index" class="phone-row">
+            <div class="row align-items-end">
+              <div class="col-md-3">
+                <div class="form-group">
+                  <label [for]="'phoneType' + i">Τύπος</label>
+                  <select 
+                    [id]="'phoneType' + i"
+                    [formControlName]="i" 
+                    class="form-control"
+                  >
+                    <option value="mobile">Κινητό</option>
+                    <option value="home">Σταθερό</option>
+                    <option value="work">Εργασίας</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-md-7">
+                <div class="form-group">
+                  <label [for]="'phoneNumber' + i">Αριθμός</label>
+                  <input 
+                    type="text" 
+                    [id]="'phoneNumber' + i"
+                    [formControlName]="i" 
+                    class="form-control"
+                    placeholder="π.χ. 6931234567"
+                  >
+                  <div 
+                    *ngIf="phones.at(i).get('number')?.invalid && phones.at(i).get('number')?.touched" 
+                    class="invalid-feedback d-block"
+                  >
+                    <div *ngIf="phones.at(i).get('number')?.errors?.['required']">
+                      Απαιτείται αριθμός
+                    </div>
+                    <div *ngIf="phones.at(i).get('number')?.errors?.['pattern']">
+                      10 ψηφία χωρίς κενά
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-2">
+                <button 
+                  type="button" 
+                  (click)="removePhone(i)" 
+                  class="btn btn-danger w-100"
+                  [disabled]="phones.length === 1"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <button 
+          type="button" 
+          (click)="addPhone()" 
+          class="btn btn-outline-secondary mt-2"
+          *ngIf="isEditing"
+        >
+          <i class="bi bi-plus-circle me-2"></i>
+          Προσθήκη Τηλεφώνου
+        </button>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions" *ngIf="isEditing">
+        <button 
+          type="button" 
+          (click)="toggleEdit()" 
+          class="btn btn-cancel"
+        >
+          Ακύρωση
+        </button>
+        <button 
+          type="submit" 
+          [disabled]="profileForm.invalid || userService.loading()" 
+          class="btn btn-save"
+        >
+          <span *ngIf="userService.loading()" class="spinner-border spinner-border-sm me-2"></span>
+          {{ userService.loading() ? 'Αποθήκευση...' : 'Αποθήκευση Αλλαγών' }}
+        </button>
+      </div>
+    </form>
+
+    <div *ngIf="userService.error()" class="alert alert-danger mt-4">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ userService.error() }}
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="danger-zone" *ngIf="!isEditing">
+      <h4 class="section-title text-danger">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        Ζώνη Κινδύνου
+      </h4>
+      <p class="text-muted">
+        Η διαγραφή του λογαριασμού σας είναι μόνιμη ενέργεια και δεν μπορεί να αναιρεθεί.
+        Όλα τα δεδομένα σας (εγγραφές, παιδιά) θα διαγραφούν.
+      </p>
+      <button 
+        (click)="deleteAccount()" 
+        class="btn btn-danger"
+      >
+        <i class="bi bi-trash-fill me-2"></i>
+        Διαγραφή Λογαριασμού
+      </button>
+    </div>
+  </div>
+</div>
