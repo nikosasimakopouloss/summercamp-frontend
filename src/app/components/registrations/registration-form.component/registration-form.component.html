@@ -39,7 +39,7 @@
   </div>
 
   <!-- No Campers Warning -->
-  <div *ngIf="!loading() && campers().length === 0 && !isEditMode()" class="warning-alert">
+  <!-- <div *ngIf="!loading() && campers().length === 0 && !isEditMode()" class="warning-alert">
     <div class="alert-icon">
       <i class="fas fa-exclamation-circle"></i>
     </div>
@@ -50,10 +50,10 @@
     <button class="btn btn-primary" routerLink="/campers/new">
       <i class="fas fa-user-plus"></i> Create Camper
     </button>
-  </div>
+  </div> -->
 
   <!-- Form -->
-  <form *ngIf="!loading() && campers().length > 0" [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="registration-form">
+  <form  [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="registration-form">
     
     <!-- Camper Selection -->
     <div class="form-section">
@@ -68,7 +68,7 @@
           formControlName="camper"
           [class.is-invalid]="camper?.invalid && (camper?.dirty || camper?.touched)"
           [class.is-valid]="camper?.valid && (camper?.dirty || camper?.touched)"
-          [disabled]="isEditMode()">
+          >
           <option value="" disabled>Select a camper...</option>
           <option *ngFor="let camper of campers()" [value]="camper._id">
             {{ camper.fullName }} ({{ getCamperAge(camper._id!) }} years old)
@@ -140,6 +140,55 @@
           </div>
         </div>
       </div>
+
+
+      <!-- Add this after the campPeriod dropdown -->
+<div class="alert alert-info">
+  <h6>Debug Camp Period:</h6>
+  <p>Selected: {{ campPeriod?.value }}</p>
+  <p>Available Options:</p>
+  <ul>
+    <li *ngFor="let period of campPeriods()">
+      Value: "{{ period.value }}" | Label: {{ period.label }}
+    </li>
+  </ul>
+</div>
+
+
+
+<!-- Add this debug section -->
+<div class="alert alert-danger mt-3">
+  <h6>Form Validation Debug:</h6>
+  <p>Form Valid: {{ registrationForm.valid }}</p>
+  <p>Form Invalid: {{ registrationForm.invalid }}</p>
+  <p>Camper has value: {{ !!camper?.value }}</p>
+  <p>Is Form Valid (computed): {{ isFormValid() }}</p>
+  
+  <h6 class="mt-2">Field Status:</h6>
+  <ul>
+    <li *ngFor="let control of getFormControlsArray()">
+      {{control.name}}: 
+      Value = "{{control.value}}", 
+      Valid = {{control.valid}}, 
+      Errors = {{control.errors | json}}
+    </li>
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       
       <!-- Availability Warning -->
       <div *ngIf="camper?.value && campPeriod?.value && !checkCamperAvailability()" class="warning-message">
@@ -156,13 +205,24 @@
         <label for="beneficiary" class="required">
           <i class="fas fa-user-circle"></i> Beneficiary Name
         </label>
-        <input
+        <!-- <input
           type="text"
           id="beneficiary"
           formControlName="beneficiary"
           placeholder="Full name of the camper attending camp"
           [class.is-invalid]="beneficiary?.invalid && (beneficiary?.dirty || beneficiary?.touched)"
-          [class.is-valid]="beneficiary?.valid && (beneficiary?.dirty || beneficiary?.touched)">
+          [class.is-valid]="beneficiary?.valid && (beneficiary?.dirty || beneficiary?.touched)"> -->
+
+          <select
+  id="beneficiary"
+  formControlName="beneficiary"
+  [class.is-invalid]="beneficiary?.invalid && (beneficiary?.dirty || beneficiary?.touched)">
+  <option value="" disabled>Επιλέξτε δικαιούχο</option>
+  <option *ngFor="let type of beneficiaryTypes()" [value]="type.value">
+    {{ type.label }}
+  </option>
+</select>
+
         
         <div *ngIf="beneficiary?.invalid && (beneficiary?.dirty || beneficiary?.touched)" class="invalid-feedback">
           <div *ngIf="beneficiary?.errors?.['required']">Beneficiary name is required</div>
@@ -323,7 +383,7 @@
       <button
         type="submit"
         class="btn btn-primary"
-        [disabled]="!isFormValid() || saving()">
+        [disabled]=" registrationForm.invalid || saving()">
         <span *ngIf="saving()">
           <i class="fas fa-spinner fa-spin"></i> Processing...
         </span>

@@ -53,7 +53,7 @@ export class UserService {
     this.error.set('');
     
     return this.http.post<ILoginResponse>(
-      `${environment.apiUrl}/auth/login`, 
+      `${environment.apiUrl}/api/auth/login`, 
       credentials
     );
   }
@@ -87,26 +87,26 @@ export class UserService {
     this.error.set('');
     
     return this.http.post<IUser>(
-      `${environment.apiUrl}/users`, 
+      `${environment.apiUrl}/api/users`, 
       data
     );
   }
 
   getUser(id: string) {
-    return this.http.get<IUser>(`${environment.apiUrl}/users/${id}`);
+    return this.http.get<IUser>(`${environment.apiUrl}/api/users/${id}`);
   }
 
   updateUser(id: string, data: Partial<IUser>) {
-    return this.http.put<IUser>(`${environment.apiUrl}/users/${id}`, data);
+    return this.http.put<IUser>(`${environment.apiUrl}/api/users/${id}`, data);
   }
 
   deleteUser(id: string) {
-    return this.http.delete(`${environment.apiUrl}/users/${id}`);
+    return this.http.delete(`${environment.apiUrl}/api/users/${id}`);
   }
 
   // Admin Operations
   getAllUsers() {
-    return this.http.get<IUser[]>(`${environment.apiUrl}/users`);
+    return this.http.get<IUser[]>(`${environment.apiUrl}/api/users`);
   }
 
   // Utility Methods
@@ -139,7 +139,7 @@ export class UserService {
 
   checkAmkaAvailable(amka: string) {
     return this.http.post<ICheckAmkaResponse>(
-      `${environment.apiUrl}/users/check-amka`, 
+      `${environment.apiUrl}/api/users/check-amka`, 
       { amka }
     );
   }

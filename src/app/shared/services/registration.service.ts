@@ -21,7 +21,7 @@ export class RegistrationService {
     this.error.set('');
     
     return this.http.post<IRegistration>(
-      `${environment.apiUrl}/registrations/registrations`, 
+      `${environment.apiUrl}/api/registrations/registrations`, 
       registration
     );
   }
@@ -31,7 +31,7 @@ export class RegistrationService {
     this.error.set('');
     
     return this.http.get<IRegistration[]>(
-      `${environment.apiUrl}/registrations/registrations`
+      `${environment.apiUrl}/api/registrations/registrations`
     );
   }
 
@@ -53,7 +53,7 @@ export class RegistrationService {
     this.error.set('');
     
     return this.http.get<IRegistration>(
-      `${environment.apiUrl}/registrations/registrations/${id}`
+      `${environment.apiUrl}/api/registrations/registrations/${id}`
     );
   }
 
@@ -69,32 +69,32 @@ export class RegistrationService {
   // Admin Operations
   getAllRegistrations() {
     return this.http.get<IRegistration[]>(
-      `${environment.apiUrl}/registrations/admin/registrations`
+      `${environment.apiUrl}/api/registrations/admin/registrations`
     );
   }
 
   getRegistrationById(id: string) {
     return this.http.get<IRegistration>(
-      `${environment.apiUrl}/registrations/admin/registrations/${id}`
+      `${environment.apiUrl}/api/registrations/admin/registrations/${id}`
     );
   }
 
   updateAnyRegistration(id: string, registration: IRegistration) {
     return this.http.put<IRegistration>(
-      `${environment.apiUrl}/registrations/admin/registrations/${id}`, 
+      `${environment.apiUrl}/api/registrations/admin/registrations/${id}`, 
       registration
     );
   }
 
   deleteAnyRegistration(id: string) {
     return this.http.delete(
-      `${environment.apiUrl}/registrations/admin/registrations/${id}`
+      `${environment.apiUrl}/api/registrations/admin/registrations/${id}`
     );
   }
 
   searchRegistrationsByAmka(amka: string) {
     return this.http.post<IRegistration[]>(
-      `${environment.apiUrl}/registrations/admin/registrations/search`, 
+      `${environment.apiUrl}/api/registrations/admin/registrations/search`, 
       { amka }
     );
   }

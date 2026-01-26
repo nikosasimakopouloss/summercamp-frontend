@@ -13,7 +13,7 @@ import { RegistrationService } from '../../shared/services/registration.service'
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  private userService = inject(UserService);
+   userService = inject(UserService);
   private camperService = inject(CamperService);
   private registrationService = inject(RegistrationService);
   

@@ -251,14 +251,14 @@
         </h3>
         
         <div formArrayName="phones">
-          <div *ngFor="let phone of phones.controls; let i = index" class="phone-row">
+          <div *ngFor="let phone of phones.controls; let i = index" [formGroupName]="i" class="phone-row">
             <div class="row align-items-end">
               <div class="col-md-3">
                 <div class="form-group">
                   <label [for]="'phoneType' + i">Τύπος</label>
                   <select 
                     [id]="'phoneType' + i"
-                    [formControlName]="i" 
+                    [formControlName]="$any('type')" 
                     class="form-control"
                   >
                     <option value="mobile">Κινητό</option>
@@ -273,7 +273,7 @@
                   <input 
                     type="text" 
                     [id]="'phoneNumber' + i"
-                    [formControlName]="i" 
+                    formControlName="number" 
                     class="form-control"
                     placeholder="π.χ. 6931234567"
                   >

@@ -48,23 +48,39 @@ export class RegistrationFormComponent implements OnInit, OnDestroy {
   currentRegistration = this.registrationService.currentRegistration;
   
   // Camp options
-  campTypes = signal([
-    { value: 'summer', label: 'Summer Camp', periods: [] },
-    { value: 'winter', label: 'Winter Camp', periods: [] },
-    { value: 'easter', label: 'Easter Camp', periods: [] },
-    { value: 'weekend', label: 'Weekend Camp', periods: [] }
-  ]);
+  // Fix the campTypes - Use exact Greek values
+campTypes = signal([
+  { value: 'Η Φωλιά του Παιδιού', label: 'Η Φωλιά του Παιδιού' },
+  { value: 'Ο Παράδεισος του Παιδιού', label: 'Ο Παράδεισος του Παιδιού' }
+]);
   
   // Camp periods (would typically come from API)
   campPeriods = signal([
-    { value: '2024-06-15 to 2024-06-30', label: 'June 15 - June 30, 2024' },
-    { value: '2024-07-01 to 2024-07-15', label: 'July 1 - July 15, 2024' },
-    { value: '2024-07-16 to 2024-07-31', label: 'July 16 - July 31, 2024' },
-    { value: '2024-08-01 to 2024-08-15', label: 'August 1 - August 15, 2024' },
-    { value: '2024-08-16 to 2024-08-31', label: 'August 16 - August 31, 2024' },
-    { value: '2024-12-26 to 2025-01-05', label: 'December 26 - January 5 (Winter)' },
-    { value: '2025-04-14 to 2025-04-19', label: 'April 14 - April 19 (Easter)' }
-  ]);
+  { value: "A' (16/6 - 30/6)", label: "A' (16/6 - 30/6)" },
+  { value: "B' (17/7 - 15/7)", label: "B' (17/7 - 15/7)" },
+  { value: "Γ' (16/7 - 30/7)", label: "Γ' (16/7 - 30/7)" },
+  { value: "Δ' (31/7 - 14/8) Μόνο για την Φωλιά", label: "Δ' (31/7 - 14/8) Μόνο για την Φωλιά" },
+  { value: "E' (17/8 - 31/8) Μόνο για την Φωλιά", label: "E' (17/8 - 31/8) Μόνο για την Φωλιά" }
+]);
+
+
+
+filteredCampPeriods = signal<any[]>([]);
+
+
+// Add beneficiary types
+beneficiaryTypes = signal([
+  { value: 'Μητέρα', label: 'Μητέρα' },
+  { value: 'Πατέρας', label: 'Πατέρας' }
+]);
+
+
+
+
+
+
+
+
   
   // Form group
   registrationForm!: FormGroup;
@@ -99,13 +115,12 @@ export class RegistrationFormComponent implements OnInit, OnDestroy {
   private initializeForm(): void {
     this.registrationForm = this.fb.group({
       camper: ['', Validators.required],
-      campType: ['summer', Validators.required],
-      campPeriod: ['', Validators.required],
-      beneficiary: ['', [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(100)
-      ]],
+      campType: ['Η Φωλιά του Παιδιού', Validators.required],
+      campPeriod: [this.campPeriods()[0]?.value || '', Validators.required],
+      
+      beneficiary: ['Μητέρα', Validators.required], // Default to mother
+
+
       motherName: ['', [
         Validators.required,
         Validators.minLength(2),
@@ -128,7 +143,7 @@ export class RegistrationFormComponent implements OnInit, OnDestroy {
         const camper = this.campers().find(c => c._id === camperId);
         if (camper && !this.isEditMode()) {
           this.registrationForm.patchValue({
-            beneficiary: camper.fullName || '',
+            // beneficiary: camper.fullName || '',
             motherName: '',
             fatherName: ''
           });
@@ -149,7 +164,31 @@ export class RegistrationFormComponent implements OnInit, OnDestroy {
   private filterCampPeriods(campType: string): void {
     // In a real app, you'd fetch periods from API based on campType
     // For now, we'll just enable all periods
-    this.registrationForm.get('campPeriod')?.enable();
+    // this.registrationForm.get('campPeriod')?.enable();
+
+    let filteredPeriods = this.campPeriods();
+  
+  if (campType === 'Ο Παράδεισος του Παιδιού') {
+    // Only show periods available for Παράδεισος
+    filteredPeriods = this.campPeriods().filter(period => 
+      !period.value.includes('Μόνο για την Φωλιά')
+    );
+  }
+  
+  // Update available periods
+  // You might need to create a signal for filtered periods
+  this.filteredCampPeriods.set(filteredPeriods);
+  
+  // If current campPeriod is not in filtered list, reset it
+  const currentPeriod = this.registrationForm.get('campPeriod')?.value;
+  if (currentPeriod && !filteredPeriods.some(p => p.value === currentPeriod)) {
+    this.registrationForm.patchValue({
+      campPeriod: filteredPeriods[0]?.value || ''
+    });
+  }
+
+
+
   }
   
   private loadCampers(): void {
@@ -313,6 +352,30 @@ export class RegistrationFormComponent implements OnInit, OnDestroy {
   get registrationDate() { return this.registrationForm.get('registrationDate'); }
   get isActive() { return this.registrationForm.get('isActive'); }
   get notes() { return this.registrationForm.get('notes'); }
+
+
+
+
+// Helper to get camp period value from label or vice versa
+getCampPeriodValue(label: string): string {
+  const period = this.campPeriods().find(p => p.label === label);
+  return period?.value || '';
+}
+
+getCampPeriodLabel(value: string): string {
+  const period = this.campPeriods().find(p => p.value === value);
+  return period?.label || '';
+}
+
+
+
+
+
+
+
+
+
+
   
   // Validation helpers
   getCamperName(camperId: string): string {
@@ -360,4 +423,28 @@ export class RegistrationFormComponent implements OnInit, OnDestroy {
     // In a real app, filter periods by type
     return this.campPeriods();
   }
+
+
+
+getFormControlsArray(): Array<{name: string, value: any, valid: boolean, errors: any}> {
+  const controls = [];
+  for (const [name, control] of Object.entries(this.registrationForm.controls)) {
+    controls.push({
+      name,
+      value: control.value,
+      valid: control.valid,
+      errors: control.errors
+    });
+  }
+  return controls;
+}
+
+
+
+
+
+
+
+
+
 }

@@ -21,7 +21,7 @@ export class CamperService {
     this.error.set('');
     
     return this.http.post<ICamper>(
-      `${environment.apiUrl}/registrations/campers`, 
+      `${environment.apiUrl}/api/registrations/campers`, 
       camper
     );
   }
@@ -31,7 +31,7 @@ export class CamperService {
     this.error.set('');
     
     return this.http.get<ICamper[]>(
-      `${environment.apiUrl}/registrations/campers`
+      `${environment.apiUrl}/api/registrations/campers`
     );
   }
 
@@ -53,7 +53,7 @@ export class CamperService {
     this.error.set('');
     
     return this.http.get<ICamper>(
-      `${environment.apiUrl}/registrations/campers/${id}`
+      `${environment.apiUrl}/api/registrations/campers/${id}`
     );
   }
 
@@ -62,7 +62,7 @@ export class CamperService {
     this.error.set('');
     
     return this.http.put<ICamper>(
-      `${environment.apiUrl}/registrations/campers/${id}`, 
+      `${environment.apiUrl}/api/registrations/campers/${id}`, 
       camper
     );
   }
@@ -72,13 +72,13 @@ export class CamperService {
     this.error.set('');
     
     return this.http.delete(
-      `${environment.apiUrl}/registrations/campers/${id}`
+      `${environment.apiUrl}/api/registrations/campers/${id}`
     );
   }
 
   checkCamperAmka(amka: string) {
     return this.http.post<ICheckAmkaResponse>(
-      `${environment.apiUrl}/registrations/campers/check-amka`, 
+      `${environment.apiUrl}/api/registrations/campers/check-amka`, 
       { amka }
     );
   }
@@ -86,13 +86,13 @@ export class CamperService {
   // Admin Operations
   getAllCampers() {
     return this.http.get<ICamper[]>(
-      `${environment.apiUrl}/registrations/admin/campers`
+      `${environment.apiUrl}/api/registrations/admin/campers`
     );
   }
 
   deleteAnyCamper(id: string) {
     return this.http.delete(
-      `${environment.apiUrl}/registrations/admin/campers/${id}`
+      `${environment.apiUrl}/api/registrations/admin/campers/${id}`
     );
   }
 

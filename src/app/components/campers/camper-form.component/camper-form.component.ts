@@ -75,12 +75,22 @@ export class CamperFormComponent implements OnInit, OnDestroy {
   });
   
   // Visitor type options
-  visitorTypes = [
-    { value: 'child', label: 'Child (6-12 years)' },
-    { value: 'teen', label: 'Teen (13-17 years)' },
-    { value: 'adult', label: 'Adult (18+ years)' }
-  ];
+  // visitorTypes = [
+  //   { value: 'child', label: 'Child (6-12 years)' },
+  //   { value: 'teen', label: 'Teen (13-17 years)' },
+  //   { value: 'adult', label: 'Adult (18+ years)' }
+  // ];
   
+visitorTypes = [
+{ value: 'Νέος κατασκηνωτής', label: 'Νέος κατασκηνωτής' },
+{ value: 'Παλιός κατασκηνωτής', label: 'Παλιός κατασκηνωτής' }
+];
+
+
+
+
+
+
   ngOnInit(): void {
     this.initializeForm();
     this.checkMode();
@@ -296,7 +306,7 @@ export class CamperFormComponent implements OnInit, OnDestroy {
   
   private handleSuccess(message: string): void {
     this.saving.set(false);
-    this.router.navigate(['/campers'], {
+    this.router.navigate(['/dashboard/registrations/new'], {
       queryParams: { success: message }
     });
   }

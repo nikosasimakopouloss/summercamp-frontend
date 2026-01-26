@@ -1,1 +1,190 @@
-<p>dashboard.component works!</p>
+<div class="dashboard-container">
+  <!-- Welcome Section -->
+  <div class="welcome-section mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="display-6 mb-2">
+          <!-- Καλώς ήρθες, {{user()?.firstname || user()?.username || 'Χρήστη'}}! -->
+        </h1>
+        <p class="text-muted mb-0">
+          Σύστημα Διαχείρισης Εγγραφών Κατασκηνώσεων
+        </p>
+      </div>
+      <div class="col-md-4 text-end">
+        <div class="user-info">
+          <span class="badge bg-primary fs-6 p-2">
+            <i class="bi bi-person-circle me-2"></i>
+            <!-- {{user()?.firstname || user()?.username}} -->
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions - Using routerLink -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-light">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-lightning me-2"></i>
+            Γρήγορες Δράσεις
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+
+
+          <div class="row mt-4">
+  <div class="col-12">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+
+
+
+
+            <!-- Create Registration Button -->
+            <div class="col-md-4">
+              <a class="btn btn-primary w-100 py-3" 
+                 routerLink="./campers/new"
+                 *ngIf="userService.isLoggedIn()">
+                <i class="bi bi-plus-circle me-2"></i>
+                Νέα Εγγραφή Κατασκηνωτή
+              </a>
+            </div>
+            
+            <!-- View Registrations Button -->
+            <div class="col-md-4">
+              <a class="btn btn-success w-100 py-3" 
+                 routerLink="/registrations"
+                 *ngIf="userService.isLoggedIn()">
+                <i class="bi bi-list-ul me-2"></i>
+                Προβολή Εγγραφών
+              </a>
+            </div>
+            
+            <!-- Profile Button (if you have this route) -->
+            <div class="col-md-4">
+              <a class="btn btn-info w-100 py-3" 
+                 routerLink="/profile"
+                 *ngIf="userService.isLoggedIn()">
+                <i class="bi bi-person-badge me-2"></i>
+                Το Προφίλ μου
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Instructions -->
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-info-circle me-2"></i>
+            Πώς να ξεκινήσετε
+          </h5>
+        </div>
+        <div class="card-body">
+          <ol class="list-group list-group-numbered">
+            <li class="list-group-item border-0">
+              <strong>Βήμα 1:</strong> Ελέγξτε τις διαθέσιμες κατασκηνώσεις
+            </li>
+            <li class="list-group-item border-0">
+              <strong>Βήμα 2:</strong> Δημιουργήστε μια νέα εγγραφή
+            </li>
+            <li class="list-group-item border-0">
+              <strong>Βήμα 3:</strong> Συμπληρώστε τα στοιχεία του κατασκηνωτή
+            </li>
+            <li class="list-group-item border-0">
+              <strong>Βήμα 4:</strong> Υποβάλετε την αίτησή σας
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-calendar-check me-2"></i>
+            Επερχόμενες Κατασκηνώσεις
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="list-group">
+            <div class="list-group-item">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">Καλοκαιρινή Κατάσκηνση 2024</h6>
+                <small class="text-success">Ανοικτές Εγγραφές</small>
+              </div>
+              <p class="mb-1">Περίοδος: Ιούνιος - Αύγουστος 2024</p>
+              <a routerLink="/registrations/create" class="btn btn-sm btn-primary mt-2">
+                Εγγραφή τώρα
+              </a>
+            </div>
+            <div class="list-group-item">
+              <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1">Χειμερινή Κατάσκηνση 2024</h6>
+                <small class="text-warning">Σύντομα</small>
+              </div>
+              <p class="mb-1">Περίοδος: Δεκέμβριος 2024</p>
+              <button class="btn btn-sm btn-outline-secondary mt-2" disabled>
+                Διαθέσιμο σύντομα
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+ 
+  <!-- Quick Links Footer -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center">
+          <div class="row">
+            <div class="col-md-4 mb-3 mb-md-0">
+              <h6><i class="bi bi-telephone me-2"></i>Επικοινωνία</h6>
+              <p class="mb-1">210 1234567</p>
+              <p>info@summercamp.gr</p>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+              <h6><i class="bi bi-clock me-2"></i>Ωράριο</h6>
+              <p class="mb-1">Δευτέρα - Παρασκευή: 9:00 - 17:00</p>
+              <p>Σάββατο: 9:00 - 14:00</p>
+            </div>
+            <div class="col-md-4">
+              <h6><i class="bi bi-link me-2"></i>Χρήσιμοι Σύνδεσμοι</h6>
+              <div class="d-flex flex-column">
+                <a routerLink="/about" class="mb-1">Σχετικά με εμάς</a>
+                <a routerLink="/faq" class="mb-1">Συχνές Ερωτήσεις</a>
+                <a routerLink="/contact" class="mb-1">Επικοινωνία</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple Copyright Footer -->
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="text-center text-muted">
+        <small>
+          <i class="bi bi-shield-check me-1"></i>
+          © 2024 Summer Camp Registration. Με επιφύλαξη παντός δικαιώματος.
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
