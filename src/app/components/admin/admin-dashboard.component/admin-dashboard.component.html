@@ -51,7 +51,7 @@
               <!-- Manage Users Button -->
               <div class="col-md-3">
                 <a class="btn btn-primary w-100 py-3" 
-                   routerLink="/admin/users">
+                   routerLink="./users">
                   <i class="bi bi-people me-2"></i>
                   Διαχείριση Χρηστών
                   <span class="badge bg-white text-primary ms-1">{{totalUsers}}</span>
@@ -61,17 +61,24 @@
               <!-- Manage Campers Button -->
               <div class="col-md-3">
                 <a class="btn btn-success w-100 py-3" 
-                   routerLink="/admin/campers">
+                   routerLink="./campers">
                   <i class="bi bi-person-badge me-2"></i>
                   Διαχείριση Κατασκηνωτών
                   <span class="badge bg-white text-success ms-1">{{totalCampers}}</span>
                 </a>
               </div>
+
+
+
+           
+
+
+
               
               <!-- Manage Registrations Button -->
               <div class="col-md-3">
                 <a class="btn btn-info w-100 py-3" 
-                   routerLink="/admin/registrations">
+                   routerLink="./registrations">
                   <i class="bi bi-clipboard-check me-2"></i>
                   Διαχείριση Εγγραφών
                   <span class="badge bg-white text-info ms-1">{{totalRegistrations}}</span>
@@ -252,6 +259,15 @@
       </div>
     </div>
 
+
+ <!-- Add this after your footer, before the closing container div -->
+<div class="mt-4">
+  <router-outlet></router-outlet>
+</div>
+
+
+
+
     <!-- Quick Instructions -->
     <div class="row mb-4">
       <div class="col-12">
@@ -327,4 +343,10 @@
       </div>
     </div>
   </div>
+
+
+
+
+
+
 </div>

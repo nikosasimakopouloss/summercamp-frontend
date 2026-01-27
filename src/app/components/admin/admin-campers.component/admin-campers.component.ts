@@ -1,17 +1,10 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
-
-// Services
 import { CamperService } from '../../../shared/services/camper.service';
 import { UserService } from '../../../shared/services/user.service';
-import { RegistrationService } from '../../../shared/services/registration.service';
-
-// Interfaces
 import { ICamper } from '../../../shared/interfaces/camper';
-import { IUser } from '../../../shared/interfaces/user';
 
 @Component({
   selector: 'app-admin-campers',
@@ -20,88 +13,68 @@ import { IUser } from '../../../shared/interfaces/user';
     CommonModule,
     RouterLink,
     FormsModule,
-    DatePipe
+    DatePipe,
   ],
   templateUrl: './admin-campers.component.html',
   styleUrls: ['./admin-campers.component.css']
 })
 export class AdminCampersComponent implements OnInit {
-  private destroy$ = new Subject<void>();
-  
   // Services
   private camperService = inject(CamperService);
   private userService = inject(UserService);
-  private registrationService = inject(RegistrationService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   
-  // Component state
-  loading = signal<boolean>(true);
-  error = signal<string>('');
+  // Expose Math to template (FIX for the error)
+  Math = Math;
   
-  // Data
-  allUsers = signal<IUser[]>([]);
-  allCampers = signal<ICamper[]>([]);
-  
-  // Filter and search
+  // Local signals for component state
   searchTerm = signal<string>('');
-  filterByParent = signal<string>('');
-  filterByStatus = signal<string>('');
-  filterByAgeGroup = signal<string>('');
-  sortBy = signal<'name' | 'parent' | 'age' | 'createdAt'>('createdAt');
-  sortAscending = signal<boolean>(false);
+  filterByAge = signal<string>('');
+  sortBy = signal<'name' | 'age' | 'dateAdded'>('name');
+  sortAscending = signal<boolean>(true);
+  
+  // Pagination signals
+  currentPage = signal<number>(1);
+  itemsPerPage = signal<number>(10);
   
   // UI state
   showDeleteModal = signal<boolean>(false);
   selectedCamperForDelete = signal<ICamper | null>(null);
-  showBulkActions = signal<boolean>(false);
-  selectedCampers = signal<Set<string>>(new Set());
   
-  // Computed properties
+  // Get campers from service
+  campers = this.camperService.campers;
+  loading = this.camperService.loading;
+  error = this.camperService.error;
+  
+  // Check if user is admin (for safety, even though route is protected)
+  get isAdmin(): boolean {
+    return this.userService.isAdmin();
+  }
+  
+  // Filtered and sorted campers
   filteredCampers = computed(() => {
-    let campers = [...this.allCampers()];
+    let campers = [...(this.campers() || [])];
     const search = this.searchTerm().toLowerCase().trim();
-    const parentId = this.filterByParent();
-    const status = this.filterByStatus();
-    const ageGroup = this.filterByAgeGroup();
+    const filter = this.filterByAge();
     const sortField = this.sortBy();
     const ascending = this.sortAscending();
     
     // Apply search filter
     if (search) {
       campers = campers.filter(camper =>
-        camper.fullName?.toLowerCase().includes(search) ||
-        camper.amka?.includes(search) ||
-        camper.additionalInfo?.toLowerCase().includes(search) ||
-        this.getParentName(camper.parent).toLowerCase().includes(search)
+        (camper.fullName?.toLowerCase().includes(search) || false) ||
+        (camper.amka?.includes(search) || false) ||
+        (camper.additionalInfo?.toLowerCase().includes(search) || false) ||
+        (camper.parent?.toLowerCase().includes(search) || false)
       );
     }
     
-    // Apply parent filter
-    if (parentId) {
-      campers = campers.filter(camper => camper.parent === parentId);
-    }
-    
-    // Apply status filter
-    if (status) {
-      if (status === 'health-accepted') {
-        campers = campers.filter(camper => camper.healthDeclarationAccepted === true);
-      } else if (status === 'health-pending') {
-        campers = campers.filter(camper => camper.healthDeclarationAccepted === false);
-      }
-    }
-    
-    // Apply age group filter
-    if (ageGroup) {
-      campers = campers.filter(camper => {
-        const age = this.calculateAge(camper.dateOfBirth);
-        switch (ageGroup) {
-          case 'preschool': return age < 6;
-          case 'child': return age >= 6 && age < 13;
-          case 'teen': return age >= 13 && age < 18;
-          case 'adult': return age >= 18;
-          default: return true;
-        }
-      });
+    // Apply age filter if set
+    if (filter) {
+      campers = campers.filter(camper => 
+        this.getAgeGroup(camper.dateOfBirth) === filter
+      );
     }
     
     // Apply sorting
@@ -112,17 +85,12 @@ export class AdminCampersComponent implements OnInit {
         case 'name':
           comparison = (a.fullName || '').localeCompare(b.fullName || '');
           break;
-        case 'parent':
-          const parentA = this.getParentName(a.parent);
-          const parentB = this.getParentName(b.parent);
-          comparison = parentA.localeCompare(parentB);
-          break;
         case 'age':
           const ageA = this.calculateAge(a.dateOfBirth);
           const ageB = this.calculateAge(b.dateOfBirth);
           comparison = ageA - ageB;
           break;
-        case 'createdAt':
+        case 'dateAdded':
           const dateA = new Date(a.createdAt || 0).getTime();
           const dateB = new Date(b.createdAt || 0).getTime();
           comparison = dateA - dateB;
@@ -133,99 +101,59 @@ export class AdminCampersComponent implements OnInit {
     });
   });
   
-  // Statistics
-  stats = computed(() => {
-    const campers = this.allCampers();
-    const filtered = this.filteredCampers();
-    
-    return {
-      total: campers.length,
-      healthAccepted: campers.filter(c => c.healthDeclarationAccepted).length,
-      healthPending: campers.filter(c => !c.healthDeclarationAccepted).length,
-      showing: filtered.length,
-      selected: this.selectedCampers().size,
-      preschool: campers.filter(c => this.calculateAge(c.dateOfBirth) < 6).length,
-      child: campers.filter(c => {
-        const age = this.calculateAge(c.dateOfBirth);
-        return age >= 6 && age < 13;
-      }).length,
-      teen: campers.filter(c => {
-        const age = this.calculateAge(c.dateOfBirth);
-        return age >= 13 && age < 18;
-      }).length,
-      adult: campers.filter(c => this.calculateAge(c.dateOfBirth) >= 18).length
-    };
+  // Paginated campers
+  paginatedCampers = computed(() => {
+    const startIndex = (this.currentPage() - 1) * this.itemsPerPage();
+    return this.filteredCampers().slice(startIndex, startIndex + this.itemsPerPage());
   });
   
-  // Age groups for filtering
-  ageGroups = [
-    { value: '', label: 'All Ages' },
-    { value: 'preschool', label: 'Preschool (0-5)' },
-    { value: 'child', label: 'Child (6-12)' },
-    { value: 'teen', label: 'Teen (13-17)' },
-    { value: 'adult', label: 'Adult (18+)' }
-  ];
+  // Total pages
+  totalPages = computed(() => {
+    return Math.ceil(this.filteredCampers().length / this.itemsPerPage());
+  });
   
-  // Status options
-  statusOptions = [
-    { value: '', label: 'All Status' },
-    { value: 'health-accepted', label: 'Health Accepted' },
-    { value: 'health-pending', label: 'Health Pending' }
-  ];
+  // Empty state
+  isEmpty = computed(() => {
+    return !this.loading() && this.filteredCampers().length === 0;
+  });
   
+  // Computed for showing range in pagination (used in template)
+  showingRange = computed(() => {
+    const start = (this.currentPage() - 1) * this.itemsPerPage() + 1;
+    const end = Math.min(this.currentPage() * this.itemsPerPage(), this.filteredCampers().length);
+    return { start, end };
+  });
+
   ngOnInit(): void {
-    this.loadData();
+    // Load all campers for admin
+    this.loadCampers();
+    
+    // Subscribe to query params for filters from URL
+    this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.searchTerm.set(params['search']);
+      }
+      if (params['filter']) {
+        this.filterByAge.set(params['filter']);
+      }
+    });
   }
   
-  private loadData(): void {
-    this.loading.set(true);
-    this.error.set('');
-    
-    // Load all campers
-    this.camperService.getAllCampers().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
+  loadCampers(): void {
+    console.log('👑 Admin: Loading all campers');
+    this.camperService.getAllCampers().subscribe({
       next: (campers) => {
-        this.allCampers.set(campers);
-        this.loadUsers();
+        this.camperService.campers.set(campers);
+        console.log(`✅ Loaded ${campers.length} campers`);
       },
-      error: (error) => {
-        this.error.set('Failed to load campers: ' + (error.error?.message || error.message));
-        this.loading.set(false);
+      error: (err) => {
+        console.error('❌ Error loading campers:', err);
+        this.camperService.error.set(err.error?.message || 'Failed to load campers');
       }
     });
   }
   
-  private loadUsers(): void {
-    this.userService.getAllUsers().pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: (users) => {
-        this.allUsers.set(users);
-        this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Failed to load users:', error);
-        this.loading.set(false);
-      }
-    });
-  }
-  
-  // Helper methods
-  getParentName(parentId: string): string {
-    if (!parentId) return 'Unknown';
-    
-    const user = this.allUsers().find(u => u._id === parentId);
-    if (!user) return `User (${parentId.substring(0, 8)}...)`;
-    
-    return `${user.firstname} ${user.lastname} (${user.username})`;
-  }
-  
-  getUserEmail(parentId: string): string {
-    const user = this.allUsers().find(u => u._id === parentId);
-    return user?.email || 'N/A';
-  }
-  
+  // Age calculation
   calculateAge(birthDate: string | Date | undefined): number {
     if (!birthDate) return 0;
     
@@ -250,27 +178,17 @@ export class AdminCampersComponent implements OnInit {
     return 'Adult (18+)';
   }
   
-  getAgeGroupBadgeClass(birthDate: string | Date | undefined): string {
-    const age = this.calculateAge(birthDate);
-    
-    if (age < 6) return 'badge-preschool';
-    if (age < 13) return 'badge-child';
-    if (age < 18) return 'badge-teen';
-    return 'badge-adult';
-  }
-  
-  getHealthStatusBadgeClass(healthAccepted: boolean | undefined): string {
-    return healthAccepted ? 'badge-health-accepted' : 'badge-health-pending';
-  }
-  
-  getHealthStatusText(healthAccepted: boolean | undefined): string {
-    return healthAccepted ? 'Health Accepted' : 'Health Pending';
+  // Pagination methods
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
   }
   
   // Navigation methods
   viewCamper(camperId: string | undefined): void {
     if (camperId) {
-      this.router.navigate(['/admin/campers', camperId]);
+      this.router.navigate(['/admin/campers/view', camperId]);
     }
   }
   
@@ -280,87 +198,19 @@ export class AdminCampersComponent implements OnInit {
     }
   }
   
-  navigateToUser(userId: string | undefined): void {
-    if (userId) {
-      this.router.navigate(['/admin/users', userId]);
-    }
+  navigateToCreate(): void {
+    this.router.navigate(['/admin/campers/new']);
   }
   
-  // Selection methods
-  toggleCamperSelection(camperId: string): void {
-    const selected = new Set(this.selectedCampers());
-    if (selected.has(camperId)) {
-      selected.delete(camperId);
-    } else {
-      selected.add(camperId);
-    }
-    this.selectedCampers.set(selected);
-    this.showBulkActions.set(selected.size > 0);
-  }
-  
-  toggleSelectAll(): void {
-    if (this.selectedCampers().size === this.filteredCampers().length) {
-      this.selectedCampers.set(new Set());
-      this.showBulkActions.set(false);
-    } else {
-      const allIds = new Set(this.filteredCampers().map(c => c._id!).filter(id => !!id));
-      this.selectedCampers.set(allIds);
-      this.showBulkActions.set(true);
-    }
-  }
-  
-  isCamperSelected(camperId: string): boolean {
-    return this.selectedCampers().has(camperId);
-  }
-  
-  // Bulk actions
-  bulkDeleteSelected(): void {
-    const selectedCount = this.selectedCampers().size;
-    if (selectedCount === 0) return;
-    
-    if (confirm(`Are you sure you want to delete ${selectedCount} selected camper(s)? This action cannot be undone.`)) {
-      this.loading.set(true);
-      
-      // In a real application, you would have a bulk delete endpoint
-      // For now, we'll delete one by one
-      const deletePromises = Array.from(this.selectedCampers()).map(id => 
-        this.camperService.deleteAnyCamper(id).toPromise()
-      );
-      
-      Promise.allSettled(deletePromises).then(results => {
-        const successfulDeletes = results.filter(r => r.status === 'fulfilled').length;
-        const failedDeletes = results.filter(r => r.status === 'rejected').length;
-        
-        // Reload data
-        this.loadData();
-        
-        // Clear selection
-
-        
-        this.selectedCampers.set(new Set());
-        this.showBulkActions.set(false);
-        
-
-        if (failedDeletes > 0) {
-          this.error.set(`${successfulDeletes} camper(s) deleted, ${failedDeletes} failed`);
-        } else {
-          // Show success message
-          setTimeout(() => {
-            // Could show a toast here
-          }, 100);
-        }
+  navigateToRegistrations(camperId: string | undefined): void {
+    if (camperId) {
+      this.router.navigate(['/admin/registrations'], {
+        queryParams: { camper: camperId }
       });
     }
   }
   
-  bulkExportSelected(): void {
-    const selectedIds = Array.from(this.selectedCampers());
-    const selectedCampers = this.allCampers().filter(c => selectedIds.includes(c._id!));
-    
-    this.exportToCSV(selectedCampers, 'selected_campers');
-  }
-  
-  // Individual delete operations
+  // Delete operations
   promptDelete(camper: ICamper): void {
     this.selectedCamperForDelete.set(camper);
     this.showDeleteModal.set(true);
@@ -370,13 +220,18 @@ export class AdminCampersComponent implements OnInit {
     const camper = this.selectedCamperForDelete();
     if (!camper?._id) return;
     
+    console.log('👑 Admin deleting camper:', camper._id);
+    
     this.camperService.deleteAnyCamper(camper._id).subscribe({
       next: () => {
-        this.allCampers.update(campers => campers.filter(c => c._id !== camper._id));
+        // Remove camper from list
+        this.camperService.removeCamperFromList(camper._id!);
         this.closeDeleteModal();
+        console.log('✅ Camper deleted successfully');
       },
-      error: (error) => {
-        this.error.set('Failed to delete camper: ' + (error.error?.message || error.message));
+      error: (err) => {
+        console.error('❌ Error deleting camper:', err);
+        this.camperService.error.set(err.error?.message || 'Failed to delete camper');
         this.closeDeleteModal();
       }
     });
@@ -387,79 +242,109 @@ export class AdminCampersComponent implements OnInit {
     this.selectedCamperForDelete.set(null);
   }
   
-  // Filter methods
-  updateSearch(search: string): void {
-    this.searchTerm.set(search);
-  }
-  
-  updateParentFilter(parentId: string): void {
-    this.filterByParent.set(parentId);
-  }
-  
-  updateStatusFilter(status: string): void {
-    this.filterByStatus.set(status);
-  }
-  
-  updateAgeGroupFilter(ageGroup: string): void {
-    this.filterByAgeGroup.set(ageGroup);
-  }
-  
+  // Clear filters
   clearFilters(): void {
     this.searchTerm.set('');
-    this.filterByParent.set('');
-    this.filterByStatus.set('');
-    this.filterByAgeGroup.set('');
+    this.filterByAge.set('');
+    this.currentPage.set(1);
   }
   
-  changeSort(field: 'name' | 'parent' | 'age' | 'createdAt'): void {
-    if (this.sortBy() === field) {
-      this.sortAscending.update(value => !value);
-    } else {
-      this.sortBy.set(field);
-      this.sortAscending.set(field === 'createdAt' ? false : true);
-    }
+  // Update filters (triggered from template)
+  updateSearch(search: string): void {
+    this.searchTerm.set(search);
+    this.currentPage.set(1);
   }
   
-  // Export functionality
-  exportAllToCSV(): void {
-    this.exportToCSV(this.filteredCampers(), 'all_campers');
+  updateFilter(filter: string): void {
+    this.filterByAge.set(filter);
+    this.currentPage.set(1);
   }
   
-  private exportToCSV(campers: ICamper[], filename: string): void {
-    const headers = ['Full Name', 'Age', 'Age Group', 'AMKA', 'Health Status', 'Parent Name', 'Parent Email', 'Additional Info', 'Created'];
-    const data = campers.map(camper => [
+  toggleSort(): void {
+    this.sortAscending.update(value => !value);
+  }
+  
+  // Refresh data
+  refreshData(): void {
+    this.loadCampers();
+  }
+  
+  // Export data (if needed)
+  exportData(): void {
+    console.log('📤 Exporting campers data...');
+    // You can implement CSV/Excel export here
+    const data = this.filteredCampers();
+    const csvContent = this.convertToCSV(data);
+    this.downloadCSV(csvContent, 'campers.csv');
+  }
+  
+  // Helper methods for CSV export
+  private convertToCSV(data: any[]): string {
+    const headers = ['Όνομα', 'Ηλικία', 'ΑΜΚΑ', 'Γονέας', 'Ηλικιακή Ομάδα', 'Ημερομηνία Δημιουργίας'];
+    const rows = data.map(camper => [
       camper.fullName || '',
-      this.calculateAge(camper.dateOfBirth).toString(),
-      this.getAgeGroup(camper.dateOfBirth),
+      this.calculateAge(camper.dateOfBirth),
       camper.amka || '',
-      this.getHealthStatusText(camper.healthDeclarationAccepted),
-      this.getParentName(camper.parent),
-      this.getUserEmail(camper.parent),
-      camper.additionalInfo || '',
-      camper.createdAt ? new Date(camper.createdAt).toLocaleDateString() : ''
+      camper.parent || '',
+      this.getAgeGroup(camper.dateOfBirth),
+      camper.createdAt ? new Date(camper.createdAt).toLocaleDateString('el-GR') : ''
     ]);
     
-    const csvContent = [
-      headers.join(','),
-      ...data.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-    
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    return [headers, ...rows].map(row => row.join(',')).join('\n');
+  }
+  
+  private downloadCSV(content: string, filename: string): void {
+    const blob = new Blob([content], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
   }
   
-  // Refresh data
-  refresh(): void {
-    this.loadData();
+  // View user profile
+  viewUserProfile(userId: string | undefined): void {
+    if (userId) {
+      this.router.navigate(['/admin/users', userId]);
+    }
+  }
+
+  // Helper to get age group count
+  getAgeGroupCount(group: string): number {
+    return this.campers().filter(camper => 
+      this.getAgeGroup(camper.dateOfBirth) === group
+    ).length;
+  }
+
+  // Get page numbers for pagination
+  getPageNumbers(): number[] {
+    const current = this.currentPage();
+    const total = this.totalPages();
+    const pages: number[] = [];
+    
+    if (total <= 5) {
+      // Show all pages
+      for (let i = 1; i <= total; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show limited pages
+      if (current <= 3) {
+        pages.push(1, 2, 3, 4, 5);
+      } else if (current >= total - 2) {
+        pages.push(total - 4, total - 3, total - 2, total - 1, total);
+      } else {
+        pages.push(current - 2, current - 1, current, current + 1, current + 2);
+      }
+    }
+    
+    return pages;
   }
   
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+  // Get registration count for a camper (you'll need to implement this based on your data)
+  getRegistrationCount(camperId: string | undefined): number {
+    // TODO: Implement this method based on your registration data
+    return 0; // Placeholder
   }
 }

@@ -1,434 +1,411 @@
-<div class="admin-campers-container">
-  <!-- Header -->
-  <div class="header">
-    <div class="title-section">
-      <h1>
-        <i class="fas fa-users-cog"></i> Campers Management
-      </h1>
-      <p class="subtitle">Manage all campers in the system</p>
-    </div>
-    
-    <div class="actions">
-      <button 
-        class="btn btn-primary"
-        (click)="exportAllToCSV()"
-        [disabled]="loading() || filteredCampers().length === 0">
-        <i class="fas fa-file-export"></i> Export CSV
-      </button>
-      
-      <button 
-        class="btn btn-outline"
-        (click)="refresh()"
-        [disabled]="loading()">
-        <i class="fas fa-sync-alt" [class.fa-spin]="loading()"></i> Refresh
-      </button>
+<div class="container-fluid py-4">
+  <!-- Admin Header -->
+  <div class="admin-header mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="display-6 mb-2">
+          <i class="bi bi-person-badge me-2"></i>
+          Διαχείριση Κατασκηνωτών
+        </h1>
+        <p class="text-muted mb-0">
+          Προβολή και διαχείριση όλων των κατασκηνωτών στο σύστημα
+        </p>
+      </div>
+      <div class="col-md-4 text-end">
+        <span class="badge bg-danger fs-6 p-2">
+          <i class="bi bi-shield-check me-2"></i>
+          Διαχειριστής
+        </span>
+      </div>
     </div>
   </div>
 
-  <!-- Bulk Actions Bar -->
-  <div *ngIf="showBulkActions()" class="bulk-actions-bar">
-    <div class="bulk-info">
-      <i class="fas fa-check-circle"></i>
-      <span class="count">{{ selectedCampers().size }} camper(s) selected</span>
+  <!-- Action Buttons -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-3">
+            <button (click)="refreshData()" class="btn btn-outline-primary">
+              <i class="bi bi-arrow-clockwise me-2"></i>
+              Ανανέωση Δεδομένων
+            </button>
+            
+            <button (click)="navigateToCreate()" class="btn btn-success">
+              <i class="bi bi-plus-circle me-2"></i>
+              Νέα Κατασκηνώτρια
+            </button>
+            
+            <button (click)="exportData()" class="btn btn-info">
+              <i class="bi bi-download me-2"></i>
+              Εξαγωγή Δεδομένων
+            </button>
+            
+            <a routerLink="/admin/dashboard" class="btn btn-secondary ms-auto">
+              <i class="bi bi-arrow-left me-2"></i>
+              Πίσω στο Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
-    
-    <div class="bulk-buttons">
-      <button 
-        class="btn btn-outline"
-        (click)="bulkExportSelected()"
-        title="Export Selected">
-        <i class="fas fa-download"></i> Export Selected
-      </button>
-      
-      <button 
-        class="btn btn-danger"
-        (click)="bulkDeleteSelected()"
-        title="Delete Selected">
-        <i class="fas fa-trash"></i> Delete Selected
-      </button>
-      
-      <!-- <button 
-        class="btn btn-icon"
-        (click)="selectedCampers.set(new Set()); showBulkActions.set(false)"
-        title="Clear Selection">
-        <i class="fas fa-times"></i>
-      </button> -->
+  </div>
+
+  <!-- Filters Card -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header bg-light">
+          <h5 class="card-title mb-0">
+            <i class="bi bi-funnel me-2"></i>
+            Φίλτρα Αναζήτησης
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Αναζήτηση</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="bi bi-search"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Αναζήτηση με όνομα, ΑΜΚΑ, γονέα..."
+                  [value]="searchTerm()"
+                  (input)="updateSearch($any($event.target).value)">
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <label class="form-label">Ηλικιακή Ομάδα</label>
+              <select class="form-select" [value]="filterByAge()" (change)="updateFilter($any($event.target).value)">
+                <option value="">Όλες οι ηλικίες</option>
+                <option value="Preschool (0-5)">Προσχολική (0-5)</option>
+                <option value="Child (6-12)">Παιδί (6-12)</option>
+                <option value="Teen (13-17)">Έφηβος (13-17)</option>
+                <option value="Adult (18+)">Ενήλικος (18+)</option>
+              </select>
+            </div>
+            
+            <div class="col-md-2 d-flex align-items-end">
+              <button (click)="clearFilters()" class="btn btn-outline-secondary w-100">
+                <i class="bi bi-x-circle me-1"></i>
+                Καθαρισμός
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Statistics Cards -->
-  <div class="stats-cards" *ngIf="!loading() && allCampers().length > 0">
-    <div class="stat-card total">
-      <div class="stat-icon">
-        <i class="fas fa-users"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ stats().total }}</div>
-        <div class="stat-label">Total Campers</div>
-      </div>
-    </div>
-    
-    <div class="stat-card health-accepted">
-      <div class="stat-icon">
-        <i class="fas fa-heartbeat"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ stats().healthAccepted }}</div>
-        <div class="stat-label">Health Accepted</div>
+  <div class="row mb-4">
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-primary h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="card-title">Συνολικοί Κατασκηνωτές</h5>
+              <h2 class="mb-0">{{ campers().length }}</h2>
+              <p class="card-text">Σύνολο κατασκηνωτών</p>
+            </div>
+            <i class="bi bi-people-fill fs-1"></i>
+          </div>
+        </div>
       </div>
     </div>
     
-    <div class="stat-card child">
-      <div class="stat-icon">
-        <i class="fas fa-child"></i>
-      </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ stats().child }}</div>
-        <div class="stat-label">Children (6-12)</div>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-success h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="card-title">Παιδιά (6-12)</h5>
+              <h2 class="mb-0">{{ getAgeGroupCount('Child (6-12)') }}</h2>
+              <p class="card-text">Ηλικιακή ομάδα</p>
+            </div>
+            <i class="bi bi-person-fill fs-1"></i>
+          </div>
+        </div>
       </div>
     </div>
     
-    <div class="stat-card showing">
-      <div class="stat-icon">
-        <i class="fas fa-filter"></i>
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-warning h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="card-title">Έφηβοι (13-17)</h5>
+              <h2 class="mb-0">{{ getAgeGroupCount('Teen (13-17)') }}</h2>
+              <p class="card-text">Ηλικιακή ομάδα</p>
+            </div>
+            <i class="bi bi-person-badge-fill fs-1"></i>
+          </div>
+        </div>
       </div>
-      <div class="stat-content">
-        <div class="stat-number">{{ stats().showing }}</div>
-        <div class="stat-label">Showing</div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+      <div class="card text-white bg-info h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5 class="card-title">Προσχολική (0-5)</h5>
+              <h2 class="mb-0">{{ getAgeGroupCount('Preschool (0-5)') }}</h2>
+              <p class="card-text">Ηλικιακή ομάδα</p>
+            </div>
+            <i class="bi bi-person-circle fs-1"></i>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Error Alert -->
-  <div *ngIf="error()" class="error-alert">
-    <div class="alert-icon">
-      <i class="fas fa-exclamation-triangle"></i>
-    </div>
-    <div class="alert-content">
-      <h4>Error</h4>
-      <p>{{ error() }}</p>
-    </div>
-    <button class="btn btn-sm btn-outline" (click)="error.set('')">
-      <i class="fas fa-times"></i>
-    </button>
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading()" class="loading-state">
-    <div class="spinner"></div>
-    <p>Loading campers...</p>
+  <div *ngIf="loading()" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Φόρτωση...</span>
+    </div>
+    <p class="mt-2">Φόρτωση κατασκηνωτών...</p>
   </div>
 
-  <!-- Filter Bar -->
-  <div *ngIf="!loading() && allCampers().length > 0" class="filter-bar">
-    <div class="search-box">
-      <i class="fas fa-search"></i>
-      <input
-        type="text"
-        [ngModel]="searchTerm()"
-        (ngModelChange)="updateSearch($event)"
-        placeholder="Search by name, AMKA, parent name, or info..."
-        class="search-input">
-    </div>
-    
-    <div class="filter-controls">
-      <select 
-        [ngModel]="filterByParent()"
-        (ngModelChange)="updateParentFilter($event)"
-        class="filter-select">
-        <option value="">All Parents</option>
-        <option *ngFor="let user of allUsers()" [value]="user._id">
-          {{ user.firstname }} {{ user.lastname }} ({{ user.username }})
-        </option>
-      </select>
-      
-      <select 
-        [ngModel]="filterByStatus()"
-        (ngModelChange)="updateStatusFilter($event)"
-        class="filter-select">
-        <option *ngFor="let status of statusOptions" [value]="status.value">
-          {{ status.label }}
-        </option>
-      </select>
-      
-      <select 
-        [ngModel]="filterByAgeGroup()"
-        (ngModelChange)="updateAgeGroupFilter($event)"
-        class="filter-select">
-        <option *ngFor="let group of ageGroups" [value]="group.value">
-          {{ group.label }}
-        </option>
-      </select>
-      
-      <div class="sort-controls">
-        <button 
-          class="btn-sort"
-          [class.active]="sortBy() === 'name'"
-          (click)="changeSort('name')">
-          <i class="fas fa-sort-alpha-down"></i> Name
-          <i class="fas" [class.fa-sort-up]="sortAscending()" [class.fa-sort-down]="!sortAscending()"></i>
-        </button>
-        
-        <button 
-          class="btn-sort"
-          [class.active]="sortBy() === 'parent'"
-          (click)="changeSort('parent')">
-          <i class="fas fa-user-friends"></i> Parent
-          <i class="fas" [class.fa-sort-up]="sortAscending()" [class.fa-sort-down]="!sortAscending()"></i>
-        </button>
-        
-        <button 
-          class="btn-sort"
-          [class.active]="sortBy() === 'age'"
-          (click)="changeSort('age')">
-          <i class="fas fa-sort-numeric-down"></i> Age
-          <i class="fas" [class.fa-sort-up]="sortAscending()" [class.fa-sort-down]="!sortAscending()"></i>
-        </button>
-        
-        <button 
-          class="btn-sort"
-          [class.active]="sortBy() === 'createdAt'"
-          (click)="changeSort('createdAt')">
-          <i class="fas fa-calendar"></i> Created
-          <i class="fas" [class.fa-sort-up]="sortAscending()" [class.fa-sort-down]="!sortAscending()"></i>
-        </button>
-      </div>
-      
-      <button 
-        class="btn btn-outline"
-        (click)="clearFilters()"
-        *ngIf="searchTerm() || filterByParent() || filterByStatus() || filterByAgeGroup()">
-        <i class="fas fa-times"></i> Clear Filters
-      </button>
-    </div>
+  <!-- Error State -->
+  <div *ngIf="error()" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle me-2"></i>
+    <strong>Σφάλμα:</strong> {{ error() }}
+    <button (click)="error.set('')" class="btn-close float-end"></button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="isEmpty() && !loading()" class="text-center py-5">
+    <i class="bi bi-people display-1 text-muted"></i>
+    <h4 class="mt-3">Δεν βρέθηκαν κατασκηνωτές</h4>
+    <p class="text-muted">Δεν υπάρχουν κατασκηνωτές καταχωρημένοι στο σύστημα.</p>
+    <button (click)="navigateToCreate()" class="btn btn-primary mt-3">
+      <i class="bi bi-plus-circle me-2"></i>
+      Δημιουργία πρώτου κατασκηνωτή
+    </button>
   </div>
 
   <!-- Campers Table -->
-  <div *ngIf="!loading() && allCampers().length > 0" class="campers-table-container">
-    <div class="table-header">
-      <div class="header-info">
-        <span class="showing-count">{{ filteredCampers().length }} camper(s) found</span>
-        <span *ngIf="filteredCampers().length !== allCampers().length" class="filtered-info">
-          (filtered from {{ allCampers().length }} total)
-        </span>
-      </div>
-      
-      <div class="header-actions">
-        <button 
-          class="btn-select-all"
-          (click)="toggleSelectAll()"
-          [title]="selectedCampers().size === filteredCampers().length ? 'Deselect All' : 'Select All'">
-          <i class="fas" [class.fa-check-square]="selectedCampers().size === filteredCampers().length" [class.fa-square]="selectedCampers().size !== filteredCampers().length"></i>
-          Select All
-        </button>
-      </div>
+  <div *ngIf="!isEmpty() && !loading()" class="card">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+      <h5 class="card-title mb-0">
+        <i class="bi bi-list-ul me-2"></i>
+        Κατάλογος Κατασκηνωτών ({{ filteredCampers().length }})
+      </h5>
+      <span class="badge bg-primary">
+        Σελίδα {{ currentPage() }} από {{ totalPages() }}
+      </span>
     </div>
     
-    <div class="table-responsive">
-      <table class="campers-table">
-        <thead>
-          <tr>
-            <th class="selection-column"></th>
-            <th>Camper Details</th>
-            <th>Age / Group</th>
-            <th>AMKA</th>
-            <th>Health Declaration</th>
-            <th>Parent/Guardian</th>
-            <th>Created</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let camper of filteredCampers()">
-            <!-- Selection Checkbox -->
-            <td class="selection-cell">
-              <input
-                type="checkbox"
-                [checked]="isCamperSelected(camper._id!)"
-                (change)="toggleCamperSelection(camper._id!)"
-                class="selection-checkbox">
-            </td>
-            
-            <!-- Camper Details -->
-            <td class="camper-cell">
-              <div class="camper-info">
-                <div class="avatar">{{ camper.fullName?.charAt(0) || '?' }}</div>
-                <div>
-                  <strong class="camper-name">{{ camper.fullName || 'Unnamed Camper' }}</strong>
-                  <div *ngIf="camper.additionalInfo" class="additional-info">
-                    {{ camper.additionalInfo }}
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 20%">
+                <button class="btn btn-link text-decoration-none p-0" 
+                        (click)="sortBy.set('name'); toggleSort()">
+                  Όνομα <i class="bi bi-arrow-down-up ms-1"></i>
+                </button>
+              </th>
+              <th style="width: 10%">
+                <button class="btn btn-link text-decoration-none p-0" 
+                        (click)="sortBy.set('age'); toggleSort()">
+                  Ηλικία <i class="bi bi-arrow-down-up ms-1"></i>
+                </button>
+              </th>
+              <th style="width: 15%">ΑΜΚΑ</th>
+              <th style="width: 15%">Γονέας</th>
+              <th style="width: 10%">Ηλικιακή Ομάδα</th>
+              <th style="width: 10%">Εγγραφές</th>
+              <th style="width: 10%">Ημ/νία Δημιουργίας</th>
+              <th style="width: 10%">Ενέργειες</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let camper of paginatedCampers()">
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar-circle bg-primary text-white me-3">
+                    {{ (camper.fullName || '?')[0] }}
+                  </div>
+                  <div>
+                    <strong class="d-block">{{ camper.fullName || '--' }}</strong>
+                    <small *ngIf="camper.additionalInfo" class="text-muted">
+                      {{ camper.additionalInfo }}
+                    </small>
                   </div>
                 </div>
-              </div>
-            </td>
-            
-            <!-- Age Information -->
-            <td>
-              <span class="badge" [ngClass]="getAgeGroupBadgeClass(camper.dateOfBirth)">
-                {{ getAgeGroup(camper.dateOfBirth) }}
-              </span>
-              <div class="age-detail">
-                {{ calculateAge(camper.dateOfBirth) }} years old
-                <div *ngIf="camper.dateOfBirth" class="birth-date">
-                  ({{ camper.dateOfBirth | date:'mediumDate' }})
+              </td>
+              <td>
+                <span class="badge bg-secondary">
+                  {{ calculateAge(camper.dateOfBirth) }} έτη
+                </span>
+                <div *ngIf="camper.dateOfBirth" class="small text-muted">
+                  {{ camper.dateOfBirth | date:'dd/MM/yyyy' }}
                 </div>
-              </div>
-            </td>
-            
-            <!-- AMKA -->
-            <td class="amka-cell">
-              <code class="amka-code">{{ camper.amka || 'N/A' }}</code>
-            </td>
-            
-            <!-- Health Status -->
-            <td>
-              <span class="badge" [ngClass]="getHealthStatusBadgeClass(camper.healthDeclarationAccepted)">
-                <i class="fas" [class.fa-check-circle]="camper.healthDeclarationAccepted" [class.fa-times-circle]="!camper.healthDeclarationAccepted"></i>
-                {{ getHealthStatusText(camper.healthDeclarationAccepted) }}
-              </span>
-            </td>
-            
-            <!-- Parent Information -->
-            <td class="parent-cell">
-              <div class="parent-info">
-                <div class="parent-name">
-                  <a 
-                    href="javascript:void(0)" 
-                    (click)="navigateToUser(camper.parent)"
-                    class="parent-link">
-                    <i class="fas fa-user"></i>
-                    {{ getParentName(camper.parent) }}
+              </td>
+              <td>
+                <code>{{ camper.amka || '--' }}</code>
+              </td>
+              <td>
+                <div *ngIf="camper.parent">
+                  <a href="javascript:void(0)" 
+                     (click)="viewUserProfile(camper.parent)"
+                     class="text-decoration-none">
+                    {{ camper.parent }}
                   </a>
+                  <div class="small text-muted">
+                    ID: {{ camper.parent?.substring(0, 8) }}...
+                  </div>
                 </div>
-                <div class="parent-contact">
-                  <i class="fas fa-envelope"></i>
-                  {{ getUserEmail(camper.parent) }}
+                <span *ngIf="!camper.parent" class="text-muted">--</span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="{
+                  'bg-info': getAgeGroup(camper.dateOfBirth) === 'Preschool (0-5)',
+                  'bg-success': getAgeGroup(camper.dateOfBirth) === 'Child (6-12)',
+                  'bg-warning': getAgeGroup(camper.dateOfBirth) === 'Teen (13-17)',
+                  'bg-secondary': getAgeGroup(camper.dateOfBirth) === 'Adult (18+)'
+                }">
+                  {{ getAgeGroup(camper.dateOfBirth) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-primary">
+                  
+                </span>
+                <button  
+                        (click)="navigateToRegistrations(camper._id)"
+                        class="btn btn-link btn-sm text-decoration-none">
+                  Προβολή
+                </button>
+              </td>
+              <td>
+                <span class="small">
+                  {{ camper.createdAt | date:'dd/MM/yyyy' }}
+                </span>
+              </td>
+              <td>
+                <div class="btn-group">
+                  <button (click)="viewCamper(camper._id)" 
+                          class="btn btn-sm btn-outline-info"
+                          title="Προβολή">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button (click)="editCamper(camper._id)" 
+                          class="btn btn-sm btn-outline-primary"
+                          title="Επεξεργασία">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button (click)="promptDelete(camper)" 
+                          class="btn btn-sm btn-outline-danger"
+                          title="Διαγραφή">
+                    <i class="bi bi-trash"></i>
+                  </button>
                 </div>
-                <div class="parent-id">
-                  <small>ID: {{ camper.parent?.substring(0, 8) }}...</small>
-                </div>
-              </div>
-            </td>
-            
-            <!-- Created Date -->
-            <!-- <td>
-              {{ camper.createdAt | date:'mediumDate' }}
-              <div class="time-ago">
-                <small>{{ getTimeAgo(camper.createdAt) }}</small>
-              </div>
-            </td> -->
-            
-            <!-- Actions -->
-            <td class="actions-cell">
-              <div class="action-buttons">
-                <button 
-                  class="btn-icon btn-view"
-                  (click)="viewCamper(camper._id)"
-                  title="View Details">
-                  <i class="fas fa-eye"></i>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination -->
+      <div *ngIf="totalPages() > 1" class="card-footer">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted">
+              Εμφάνιση {{ (currentPage() - 1) * itemsPerPage() + 1 }} -
+              {{ Math.min(currentPage() * itemsPerPage(), filteredCampers().length) }}
+              από {{ filteredCampers().length }} κατασκηνωτές
+            </span>
+          </div>
+          
+          <nav>
+            <ul class="pagination mb-0">
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button class="page-link" (click)="changePage(1)" title="Πρώτη σελίδα">
+                  <i class="bi bi-chevron-double-left"></i>
                 </button>
-                
-                <button 
-                  class="btn-icon btn-edit"
-                  (click)="editCamper(camper._id)"
-                  title="Edit Camper">
-                  <i class="fas fa-edit"></i>
+              </li>
+              
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button class="page-link" (click)="changePage(currentPage() - 1)" title="Προηγούμενη">
+                  <i class="bi bi-chevron-left"></i>
                 </button>
-                
-                <button 
-                  class="btn-icon btn-registrations"
-                  [routerLink]="['/admin/registrations']" 
-                  [queryParams]="{ camper: camper._id }"
-                  title="View Registrations">
-                  <i class="fas fa-calendar-alt"></i>
+              </li>
+              
+              <li class="page-item" *ngFor="let page of getPageNumbers()"
+                  [class.active]="currentPage() === page">
+                <button class="page-link" (click)="changePage(page)">
+                  {{ page }}
                 </button>
-                
-                <button 
-                  class="btn-icon btn-delete"
-                  (click)="promptDelete(camper)"
-                  title="Delete Camper">
-                  <i class="fas fa-trash"></i>
+              </li>
+              
+              <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+                <button class="page-link" (click)="changePage(currentPage() + 1)" title="Επόμενη">
+                  <i class="bi bi-chevron-right"></i>
                 </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </li>
+              
+              <li class="page-item" [class.disabled]="currentPage() === totalPages()">
+                <button class="page-link" (click)="changePage(totalPages())" title="Τελευταία σελίδα">
+                  <i class="bi bi-chevron-double-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
     </div>
-    
-    <!-- Empty Filter Results -->
-    <div *ngIf="filteredCampers().length === 0" class="empty-filter">
-      <i class="fas fa-search"></i>
-      <h4>No campers found</h4>
-      <p>Try adjusting your search or filters</p>
-      <button class="btn btn-outline" (click)="clearFilters()">
-        Clear Filters
-      </button>
-    </div>
-  </div>
-
-  <!-- Empty State (no campers at all) -->
-  <div *ngIf="!loading() && allCampers().length === 0" class="empty-state">
-    <div class="empty-icon">
-      <i class="fas fa-child"></i>
-    </div>
-    <h3>No Campers Found</h3>
-    <p>There are no campers registered in the system yet.</p>
   </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div *ngIf="showDeleteModal()" class="modal-overlay">
-  <div class="modal">
-    <div class="modal-header">
-      <h3>
-        <i class="fas fa-exclamation-triangle"></i>
-        Confirm Deletion
-      </h3>
-      <button class="btn-icon" (click)="closeDeleteModal()">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    
-    <div class="modal-body">
-      <p>
-        Are you sure you want to delete camper 
-        <strong>"{{ selectedCamperForDelete()?.fullName }}"</strong>?
-      </p>
-      
-      <div *ngIf="selectedCamperForDelete()" class="camper-details">
-        <div class="detail-row">
-          <span class="label">AMKA:</span>
-          <span class="value">{{ selectedCamperForDelete()?.amka || 'N/A' }}</span>
-        </div>
-        <div class="detail-row">
-          <span class="label">Parent:</span>
-          <!-- <span class="value">{{ getParentName(selectedCamperForDelete()?.parent) }}</span> -->
-        </div>
+<!-- Delete Modal -->
+<div *ngIf="showDeleteModal()" class="modal fade show d-block" tabindex="-1" 
+     style="background-color: rgba(0,0,0,0.5); z-index: 1050;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          Επιβεβαίωση Διαγραφής
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="closeDeleteModal()"></button>
       </div>
-      
-      <div class="warning-message">
-        <i class="fas fa-exclamation-circle"></i>
-        <p>
-          This action cannot be undone. All registrations associated with this camper will also be deleted.
+      <div class="modal-body">
+        <p>Είστε σίγουρος ότι θέλετε να διαγράψετε τον/την κατασκηνωτή:</p>
+        <div class="alert alert-warning">
+          <h6 class="mb-2">
+            <i class="bi bi-person me-2"></i>
+            {{ selectedCamperForDelete()?.fullName }}
+          </h6>
+          <div class="small">
+            <div>ΑΜΚΑ: {{ selectedCamperForDelete()?.amka }}</div>
+            <div>Γονέας: {{ selectedCamperForDelete()?.parent || '--' }}</div>
+          </div>
+        </div>
+        <p class="text-danger">
+          <i class="bi bi-info-circle me-1"></i>
+          <strong>Προσοχή:</strong> Αυτή η ενέργεια δεν μπορεί να αναιρεθεί. 
+          Όλες οι σχετικές εγγραφές θα διαγραφούν επίσης.
         </p>
       </div>
-    </div>
-    
-    <div class="modal-footer">
-      <button
-        type="button"
-        class="btn btn-outline"
-        (click)="closeDeleteModal()">
-        Cancel
-      </button>
-      
-      <button
-        type="button"
-        class="btn btn-danger"
-        (click)="confirmDelete()">
-        <i class="fas fa-trash"></i> Delete Camper
-      </button>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeDeleteModal()">
+          <i class="bi bi-x-circle me-1"></i>
+          Άκυρο
+        </button>
+        <button type="button" class="btn btn-danger" (click)="confirmDelete()">
+          <i class="bi bi-trash me-1"></i>
+          Διαγραφή
+        </button>
+      </div>
     </div>
   </div>
 </div>

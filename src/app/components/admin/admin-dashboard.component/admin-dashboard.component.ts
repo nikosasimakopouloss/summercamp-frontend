@@ -72,9 +72,9 @@ export class AdminDashboardComponent implements OnInit {
   // Load all campers - you need to add this method to CamperService
   private loadAllCampers(): void {
     // Assuming your CamperService has a getAllCampers method
-    // this.camperService.getAllCampers().subscribe(campers => {
-    //   this.allCampers.set(campers);
-    // });
+    this.camperService.getAllCampers().subscribe(campers => {
+      this.allCampers.set(campers);
+    });
     
     // For now, using user campers as placeholder
     if (this.camperService['campers']) {
@@ -85,9 +85,9 @@ export class AdminDashboardComponent implements OnInit {
   // Load all registrations - you need to add this method to RegistrationService
   private loadAllRegistrations(): void {
     // Assuming your RegistrationService has a getAllRegistrations method
-    // this.registrationService.getAllRegistrations().subscribe(regs => {
-    //   this.allRegistrations.set(regs);
-    // });
+    this.registrationService.getAllRegistrations().subscribe(regs => {
+      this.allRegistrations.set(regs);
+    });
     
     // For now, using user registrations as placeholder
     if (this.registrationService['registrations']) {
