@@ -63,7 +63,7 @@ export class RegistrationService {
     this.error.set('');
     
     return this.http.delete(
-      `${environment.apiUrl}/registrations/registrations/${id}`
+      `${environment.apiUrl}/api/registrations/registrations/${id}`
     );
   }
 

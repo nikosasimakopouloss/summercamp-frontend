@@ -105,12 +105,12 @@ export class AdminUsersComponent implements OnInit {
           const dateB = new Date(b.createdAt || 0).getTime();
           comparison = dateA - dateB;
           break;
-        case 'lastLogin':
-          // Assuming lastLogin is a field in IUser, if not we can ignore
-          const loginA = new Date((a as any).lastLogin || 0).getTime();
-          const loginB = new Date((b as any).lastLogin || 0).getTime();
-          comparison = loginA - loginB;
-          break;
+        // case 'lastLogin':
+        //   // Assuming lastLogin is a field in IUser, if not we can ignore
+        //   const loginA = new Date((a as any).lastLogin || 0).getTime();
+        //   const loginB = new Date((b as any).lastLogin || 0).getTime();
+        //   comparison = loginA - loginB;
+        //   break;
       }
       
       return this.sortAscending() ? comparison : -comparison;

@@ -1,0 +1,330 @@
+
+<div class="dashboard-container">
+  <!-- Welcome Section -->
+  <div class="welcome-section mb-4">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1 class="display-6 mb-2">
+          Καλώς ήρθες, {{user?.firstname || user?.username || 'Διαχειριστή'}}!
+        </h1>
+        <p class="text-muted mb-0">
+          Πίνακας Ελέγχου Διαχειριστή - Σύστημα Διαχείρισης Κατασκηνώσεων
+        </p>
+      </div>
+      <div class="col-md-4 text-end">
+        <div class="d-flex align-items-center justify-content-end gap-2">
+          <button (click)="refreshData()" class="btn btn-sm btn-outline-light">
+            <i class="bi bi-arrow-clockwise"></i> Ανανέωση
+          </button>
+          <span class="badge bg-danger fs-6 p-2">
+            <i class="bi bi-shield-check me-2"></i>
+            Διαχειριστής
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Φόρτωση...</span>
+    </div>
+    <p class="mt-2">Φόρτωση δεδομένων διαχειριστή...</p>
+  </div>
+
+  <!-- Admin Content -->
+  <div *ngIf="!loading()">
+    <!-- Admin Quick Actions -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-speedometer2 me-2"></i>
+              Εργαλεία Διαχείρισης
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              
+              <!-- Manage Users Button -->
+              <div class="col-md-3">
+                <a class="btn btn-primary w-100 py-3" 
+                   routerLink="/admin/users">
+                  <i class="bi bi-people me-2"></i>
+                  Διαχείριση Χρηστών
+                  <span class="badge bg-white text-primary ms-1">{{totalUsers}}</span>
+                </a>
+              </div>
+              
+              <!-- Manage Campers Button -->
+              <div class="col-md-3">
+                <a class="btn btn-success w-100 py-3" 
+                   routerLink="/admin/campers">
+                  <i class="bi bi-person-badge me-2"></i>
+                  Διαχείριση Κατασκηνωτών
+                  <span class="badge bg-white text-success ms-1">{{totalCampers}}</span>
+                </a>
+              </div>
+              
+              <!-- Manage Registrations Button -->
+              <div class="col-md-3">
+                <a class="btn btn-info w-100 py-3" 
+                   routerLink="/admin/registrations">
+                  <i class="bi bi-clipboard-check me-2"></i>
+                  Διαχείριση Εγγραφών
+                  <span class="badge bg-white text-info ms-1">{{totalRegistrations}}</span>
+                </a>
+              </div>
+              
+              <!-- Back to User Dashboard Button -->
+              <div class="col-md-3">
+                <a class="btn btn-secondary w-100 py-3" 
+                   routerLink="/dashboard">
+                  <i class="bi bi-arrow-left-circle me-2"></i>
+                  Προβολή Κανονικού Dashboard
+                </a>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Admin Statistics Section -->
+    <div class="row mb-4">
+      <div class="col-md-3 mb-3">
+        <div class="card text-white bg-primary h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title">Συνολικοί Χρήστες</h5>
+                <h2 class="mb-0">{{ totalUsers }}</h2>
+                <p class="card-text">Καταχωρημένοι στο σύστημα</p>
+              </div>
+              <i class="bi bi-people fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-3 mb-3">
+        <div class="card text-white bg-success h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title">Εγγεγραμμένοι Κατασκηνωτές</h5>
+                <h2 class="mb-0">{{ totalCampers }}</h2>
+                <p class="card-text">Σύνολο κατασκηνωτών</p>
+              </div>
+              <i class="bi bi-person-badge fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-3 mb-3">
+        <div class="card text-white bg-warning h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title">Εγγραφές</h5>
+                <h2 class="mb-0">{{ totalRegistrations }}</h2>
+                <p class="card-text">Συνολικές εγγραφές</p>
+              </div>
+              <i class="bi bi-clipboard-check fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-3 mb-3">
+        <div class="card text-white bg-danger h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title">Εκκρεμείς</h5>
+                <h2 class="mb-0">{{ pendingRegistrations }}</h2>
+                <p class="card-text">Προς επεξεργασία</p>
+              </div>
+              <i class="bi bi-clock-history fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users and Campers Quick View -->
+    <div class="row mb-4">
+      <!-- Recent Users -->
+      <div class="col-md-6 mb-4">
+        <div class="card h-100">
+          <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">
+                <i class="bi bi-person-plus me-2"></i>
+                Πρόσφατοι Χρήστες
+              </h5>
+              <a routerLink="/admin/users" class="btn btn-sm btn-outline-primary">
+                Προβολή Όλων
+              </a>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Όνομα Χρήστη</th>
+                    <th>Όνομα</th>
+                    <th>Email</th>
+                    <th>Ρόλοι</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let user of recentUsers">
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.firstname }} {{ user.lastname }}</td>
+                    <td>{{ user.email || '--' }}</td>
+                    <td>
+                      <span class="badge bg-info" *ngFor="let roleName of getUserRoleNames(user)">
+                        {{ roleName }}
+                      </span>
+                      <span *ngIf="getUserRoleNames(user).length === 0" class="text-muted">--</span>
+                    </td>
+                  </tr>
+                  <tr *ngIf="recentUsers.length === 0">
+                    <td colspan="4" class="text-center text-muted">
+                      Δεν υπάρχουν χρήστες προς εμφάνιση
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Campers -->
+      <div class="col-md-6 mb-4">
+        <div class="card h-100">
+          <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">
+                <i class="bi bi-person-badge me-2"></i>
+                Πρόσφατοι Κατασκηνωτές
+              </h5>
+              <a routerLink="/admin/campers" class="btn btn-sm btn-outline-success">
+                Προβολή Όλων
+              </a>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Όνομα</th>
+                    <th>Επώνυμο</th>
+                    <th>AMKA</th>
+                    <th>Ημ/νία Εγγραφής</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let camper of recentCampers">
+                    <td>{{ camper.firstname || '--' }}</td>
+                    <td>{{ camper.lastname || '--' }}</td>
+                    <td>{{ camper.amka || '--' }}</td>
+                    <td>{{ formatDate(camper.createdAt) }}</td>
+                  </tr>
+                  <tr *ngIf="recentCampers.length === 0">
+                    <td colspan="4" class="text-center text-muted">
+                      Δεν υπάρχουν κατασκηνωτές προς εμφάνιση
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Instructions -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header bg-light">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-info-circle me-2"></i>
+              Διαχειριστικές Οδηγίες
+            </h5>
+          </div>
+          <div class="card-body">
+            <ol class="list-group list-group-numbered">
+              <li class="list-group-item border-0">
+                <strong>Διαχείριση Χρηστών:</strong> Μπορείτε να δημιουργήσετε, επεξεργαστείτε και να διαγράψετε χρήστες.
+              </li>
+              <li class="list-group-item border-0">
+                <strong>Διαχείριση Κατασκηνωτών:</strong> Προβολή όλων των κατασκηνωτών και επεξεργασία στοιχείων.
+              </li>
+              <li class="list-group-item border-0">
+                <strong>Διαχείριση Εγγραφών:</strong> Έγκριση ή απόρριψη αιτήσεων κατασκηνώσεων.
+              </li>
+              <li class="list-group-item border-0">
+                <strong>Στατιστικά:</strong> Προβολή στατιστικών στοιχείων του συστήματος.
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Footer -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body text-center">
+          <div class="row">
+            <div class="col-md-4 mb-3 mb-md-0">
+              <h6><i class="bi bi-database me-2"></i>Στατιστικά Συστήματος</h6>
+              <p class="mb-1">Χρήστες: {{ totalUsers }}</p>
+              <p>Κατασκηνωτές: {{ totalCampers }}</p>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+              <h6><i class="bi bi-shield-check me-2"></i>Ασφάλεια</h6>
+              <p class="mb-1">Τελευταία σύνδεση: {{ currentTime }}</p>
+              <p>Διαχειριστής: {{ user?.username }}</p>
+            </div>
+            <div class="col-md-4">
+              <h6><i class="bi bi-box-arrow-right me-2"></i>Λογαριασμός</h6>
+              <div class="d-flex flex-column gap-2">
+                <button (click)="logout()" class="btn btn-sm btn-outline-danger">
+                  Αποσύνδεση
+                </button>
+                <a routerLink="/dashboard/profile" class="btn btn-sm btn-outline-primary">
+                  Προφίλ Χρήστη
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copyright -->
+  <div class="row mt-3">
+    <div class="col-12">
+      <div class="text-center text-muted">
+        <small>
+          <i class="bi bi-shield-lock me-1"></i>
+          © 2024 Summer Camp Admin Panel. Προστατεύεται με κωδικό διαχειριστή.
+        </small>
+      </div>
+    </div>
+  </div>
+</div>

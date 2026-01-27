@@ -50,26 +50,111 @@ export const routes: Routes = [
       { 
         path: 'registrations/edit/:id', 
         loadComponent: () => import('./components/registrations/registration-form.component/registration-form.component').then(m => m.RegistrationFormComponent) 
-      },
+      }
       
       // Admin child routes
-      { 
-        path: 'admin/users', 
-        loadComponent: () => import('./components/admin/admin-users.component/admin-users.component').then(m => m.AdminUsersComponent),
-        canActivate: [adminRoleGuard]
-      },
-      { 
-        path: 'admin/campers', 
-        loadComponent: () => import('./components/admin/admin-campers.component/admin-campers.component').then(m => m.AdminCampersComponent),
-        canActivate: [adminRoleGuard]
-      },
-      { 
-        path: 'admin/registrations', 
-        loadComponent: () => import('./components/admin/admin-registrations.component/admin-registrations.component').then(m => m.AdminRegistrationsComponent),
-        canActivate: [adminRoleGuard]
-      }
+      // { 
+      //   path: 'admin/users', 
+      //   loadComponent: () => import('./components/admin/admin-users.component/admin-users.component').then(m => m.AdminUsersComponent),
+      //   canActivate: [adminRoleGuard]
+      // },
+      // { 
+      //   path: 'admin/campers', 
+      //   loadComponent: () => import('./components/admin/admin-campers.component/admin-campers.component').then(m => m.AdminCampersComponent),
+      //   canActivate: [adminRoleGuard]
+      // },
+      // { 
+      //   path: 'registrations/admin/registrations', 
+      //   loadComponent: () => import('./components/admin/admin-registrations.component/admin-registrations.component').then(m => m.AdminRegistrationsComponent),
+      //   canActivate: [adminRoleGuard]
+      // }
     ]
   },
+
+
+
+// { 
+//   path: 'admin', 
+//   canActivate: [authGuard, adminRoleGuard],
+//   children: [
+//     { 
+//       path: 'dashboard', 
+//       loadComponent: () => import('./components/admin/admin-dashboard.component/admin-dashboard.component').then(m => m.AdminDashboardComponent),
+//       children: [
+//         { 
+//           path: '', 
+//           pathMatch: 'full',
+//           redirectTo: 'dashboard'  // Redirect to dashboard 
+//         },
+        
+//         { 
+//           path: 'users', 
+//           loadComponent: () => import('./components/admin/admin-users.component/admin-users.component').then(m => m.AdminUsersComponent)
+//         },
+//         { 
+//           path: 'campers', 
+//           loadComponent: () => import('./components/admin/admin-campers.component/admin-campers.component').then(m => m.AdminCampersComponent)
+//         },
+//         { 
+//           path: 'registrations', 
+//           loadComponent: () => import('./components/admin/admin-registrations.component/admin-registrations.component').then(m => m.AdminRegistrationsComponent)
+//         }
+//       ]
+//     }
+//   ]
+// },
+
+
+{ 
+  path: 'admin', 
+  canActivate: [authGuard, adminRoleGuard],
+  children: [
+    { 
+      path: '', 
+      pathMatch: 'full',
+      redirectTo: 'dashboard'
+    },
+    { 
+      path: 'dashboard', 
+      loadComponent: () => import('./components/admin/admin-dashboard.component/admin-dashboard.component').then(m => m.AdminDashboardComponent),
+      children: [
+        
+        { 
+          path: 'users', 
+          loadComponent: () => import('./components/admin/admin-users.component/admin-users.component').then(m => m.AdminUsersComponent)
+        },
+        { 
+          path: 'campers', 
+          loadComponent: () => import('./components/admin/admin-campers.component/admin-campers.component').then(m => m.AdminCampersComponent)
+        },
+        { 
+          path: 'registrations', 
+          loadComponent: () => import('./components/admin/admin-registrations.component/admin-registrations.component').then(m => m.AdminRegistrationsComponent)
+        }
+      ]
+    }
+  ]
+},
+
+
+
+
+
+
+
+
+  
+   
+
+
+
+
+
+
+
+
+
+  
   
   // Default redirects
   { path: '', redirectTo: '/login', pathMatch: 'full' },

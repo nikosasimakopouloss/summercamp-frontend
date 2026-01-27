@@ -4,7 +4,7 @@
     <div class="row align-items-center">
       <div class="col-md-8">
         <h1 class="display-6 mb-2">
-          <!-- Καλώς ήρθες, {{user()?.firstname || user()?.username || 'Χρήστη'}}! -->
+          Καλώς ήρθες, {{user?.firstname || user?.username || 'Χρήστη'}}!
         </h1>
         <p class="text-muted mb-0">
           Σύστημα Διαχείρισης Εγγραφών Κατασκηνώσεων
@@ -14,7 +14,7 @@
         <div class="user-info">
           <span class="badge bg-primary fs-6 p-2">
             <i class="bi bi-person-circle me-2"></i>
-            <!-- {{user()?.firstname || user()?.username}} -->
+            {{user?.firstname || user?.username}}
           </span>
         </div>
       </div>
@@ -66,7 +66,7 @@
             </div>
             
             <!-- Profile Button (if you have this route) -->
-            <div class="col-md-4">
+            <!-- <div class="col-md-4">
               <a class="btn btn-info w-100 py-3" 
                  routerLink="/profile"
                  *ngIf="userService.isLoggedIn()">
@@ -78,7 +78,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Simple Instructions -->
   <div class="row">
@@ -93,13 +93,13 @@
         <div class="card-body">
           <ol class="list-group list-group-numbered">
             <li class="list-group-item border-0">
-              <strong>Βήμα 1:</strong> Ελέγξτε τις διαθέσιμες κατασκηνώσεις
+              <strong>Βήμα 1:</strong> Πατήστε Νέα Εγγραφή Κατασκηνωτή
             </li>
             <li class="list-group-item border-0">
-              <strong>Βήμα 2:</strong> Δημιουργήστε μια νέα εγγραφή
+              <strong>Βήμα 2:</strong> Δημιουργήστε Νέο Κατασκηνωτή
             </li>
             <li class="list-group-item border-0">
-              <strong>Βήμα 3:</strong> Συμπληρώστε τα στοιχεία του κατασκηνωτή
+              <strong>Βήμα 3:</strong> Δημιουργήστε Νέα Αίτηση Κατασκηνωτή
             </li>
             <li class="list-group-item border-0">
               <strong>Βήμα 4:</strong> Υποβάλετε την αίτησή σας
@@ -109,7 +109,7 @@
       </div>
     </div>
 
-    <div class="col-md-6 mb-4">
+    <!-- <div class="col-md-6 mb-4">
       <div class="card h-100">
         <div class="card-header">
           <h5 class="card-title mb-0">
@@ -143,7 +143,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 
  
   <!-- Quick Links Footer -->

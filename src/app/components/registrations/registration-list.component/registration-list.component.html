@@ -3,17 +3,17 @@
   <div class="header">
     <div class="title-section">
       <h1>
-        <i class="fas fa-calendar-alt"></i> Camp Registrations
+        <i class="fas fa-calendar-alt"></i> Οι Εγγραφές μου
       </h1>
       <p class="subtitle">Manage your camp registrations</p>
     </div>
     
-    <div class="actions">
+    <!-- <div class="actions">
       <button 
         class="btn btn-primary"
         (click)="navigateToCreate()">
         <i class="fas fa-plus"></i> New Registration
-      </button>
+      </button> -->
       
       <button 
         class="btn btn-outline"
@@ -171,7 +171,7 @@
         *ngIf="campers().length === 0"
         class="btn btn-primary"
         routerLink="/campers/new">
-        <i class="fas fa-user-plus"></i> Create Camper
+        <i class="fas fa-user-plus"></i> Δημιουργία Κατασκηνωτή
       </button>
       <button 
         *ngIf="campers().length > 0"

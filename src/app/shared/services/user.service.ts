@@ -61,6 +61,29 @@ export class UserService {
   setSession(response: ILoginResponse): void {
     localStorage.setItem('access_token', response.token);
     localStorage.setItem('user', JSON.stringify(response.user));
+
+
+
+
+try {
+    const decodedToken = jwtDecode(response.token) as any;
+    console.log('🔍 Decoded JWT Token:', decodedToken);
+    console.log('🔍 Token has roles?', decodedToken.roles);
+    console.log('🔍 Full token payload:', JSON.stringify(decodedToken, null, 2));
+  } catch (error) {
+    console.error('Error decoding token:', error);
+  }
+
+
+
+
+
+
+
+
+
+
+
     
     this.user.set({
       _id: response.user._id,
@@ -114,10 +137,94 @@ export class UserService {
     return !!this.user();
   }
 
-  isAdmin(): boolean {
-    const user = this.user();
-    return user?.roles?.includes('admin') || false;
+  // isAdmin(): boolean {
+  //   const user = this.user();
+  //   return user?.roles?.includes('admin') || false;
+  // }
+
+
+// isAdmin(): boolean {
+//   const user = this.user();
+
+//  if (!user?.roles) return false;
+  
+//   // Handle both formats: array of role objects OR array of strings
+//   return user.roles.some((role: any) => {
+//     if (typeof role === 'string'     ) {
+//       // Handle string format (deprecated but for backward compatibility)
+//       return role.toUpperCase() === 'ADMIN';
+//     } else if (role && typeof role === 'object') {
+//       // Handle object format with 'role' property
+//       return role.role?.toUpperCase() === 'ADMIN';
+//     }
+//     return false;
+//   });
+// }
+
+
+isAdmin(): boolean {
+  const user = this.user();
+  
+  // Admin role ID from your logs
+  const ADMIN_ROLE_ID = '696baf403e5f117e0a9620e8';
+  
+  // Check if user has admin role ID
+  if (user?.roles) {
+    return user.roles.some((role: any) => {
+      // If role is a string (the role ID)
+      if (typeof role === 'string' && role === ADMIN_ROLE_ID) {
+        return true;
+      }
+      
+      // If role is an object with _id
+      if (role && typeof role === 'object' && role._id === ADMIN_ROLE_ID) {
+        return true;
+      }
+      
+      // If role object has role/name property
+      if (role && typeof role === 'object') {
+        const roleName = role.role || role.name || '';
+        return roleName.toUpperCase() === 'ADMIN';
+      }
+
+
+     
+
+
+
+
+      
+      return false;
+    });
   }
+  
+  // Fallback: check by username/email
+  const adminUsers = ['administrator', 'admin', 'manolis@gmail.com'];
+  return adminUsers.some(admin => 
+    user?.username?.toLowerCase() === admin.toLowerCase() ||
+    user?.email?.toLowerCase() === admin.toLowerCase()
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   getCurrentUserId(): string | null {
     return this.user()?._id || null;
