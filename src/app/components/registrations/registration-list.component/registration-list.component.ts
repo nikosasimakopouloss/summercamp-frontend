@@ -44,15 +44,15 @@ export class RegistrationListComponent implements OnInit {
   
   // Use service signals directly
   registrations = this.registrationService.registrations;
+registrationsResponse = this.registrationService.registrationsResponse;
+
   loading = this.registrationService.loading;
   error = this.registrationService.error;
   
   // Camp type options
   campTypes = signal([
-    { value: 'summer', label: 'Summer Camp' },
-    { value: 'winter', label: 'Winter Camp' },
-    { value: 'easter', label: 'Easter Camp' },
-    { value: 'weekend', label: 'Weekend Camp' }
+    { value: 'Η Φωλιά του Παιδιού', label: 'Η Φωλιά του Παιδιού' },
+  { value: 'Ο Παράδεισος του Παιδιού', label: 'Ο Παράδεισος του Παιδιού' }
   ]);
   
   // Status options
@@ -63,7 +63,7 @@ export class RegistrationListComponent implements OnInit {
   
   // Computed properties
   filteredRegistrations = computed(() => {
-    let registrations = [...(this.registrations() || [])];
+    let registrations = [...(this.registrationsResponse() || [])];
     const search = this.searchTerm().toLowerCase().trim();
     const campType = this.filterCampType();
     const status = this.filterStatus();
@@ -131,10 +131,9 @@ export class RegistrationListComponent implements OnInit {
       active: registrations.filter(r => r.isActive).length,
       inactive: registrations.filter(r => !r.isActive).length,
       showing: filtered.length,
-      summer: registrations.filter(r => r.campType === 'summer').length,
-      winter: registrations.filter(r => r.campType === 'winter').length,
-      easter: registrations.filter(r => r.campType === 'easter').length,
-      weekend: registrations.filter(r => r.campType === 'weekend').length
+      paradeisos: registrations.filter(r => r.campType === 'Ο Παράδεισος του Παιδιού').length,
+      folia: registrations.filter(r => r.campType === 'Η Φωλιά του Παιδιού').length,
+      
     };
   });
   
@@ -173,26 +172,49 @@ export class RegistrationListComponent implements OnInit {
   }
   
   // Helper methods
-  getCamperName(camperId: string): string {
-    const camper = this.campers().find(c => c._id === camperId);
-    return camper?.fullName || 'Unknown Camper';
+  // getCamperName(camperId: any): string {
+  //   const camper = this.campers().find(c => c._id === camperId);
+  //   return camper?.fullName || 'Unknown Camper';
+  // }
+
+getCamperName(camper: any): string {
+  // Handle both string ID and ICamper object
+  if (typeof camper === 'string') {
+    const camperObj = this.campers().find(c => c._id === camper);
+    return camperObj?.fullName || 'Unknown Camper';
+  } else if (camper && typeof camper === 'object') {
+    return camper.fullName || 'Unknown Camper';
+  }
+  return 'Unknown Camper';
+}
+
+
+  
+  getCamperAge(camper: any): number {
+  // Handle both string ID and camper object
+  let camperObj;
+  
+  if (typeof camper === 'string') {
+    // It's a string ID, find the camper
+    camperObj = this.campers().find(c => c._id === camper);
+  } else if (camper && typeof camper === 'object') {
+    // It's already a camper object
+    camperObj = camper;
   }
   
-  getCamperAge(camperId: string): number {
-    const camper = this.campers().find(c => c._id === camperId);
-    if (!camper?.dateOfBirth) return 0;
-    
-    const birthDate = new Date(camper.dateOfBirth);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    
-    return age;
+  if (!camperObj?.dateOfBirth) return 0;
+  
+  const birthDate = new Date(camperObj.dateOfBirth);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
   }
+  
+  return age;
+}
   
   formatCampPeriod(period: string): string {
     if (!period) return 'N/A';
@@ -244,11 +266,11 @@ export class RegistrationListComponent implements OnInit {
   }
   
   // Delete operations
-  promptDelete(registration: IRegistration): void {
-    if (confirm(`Are you sure you want to delete the registration for ${registration.beneficiary}?`)) {
-      this.deleteRegistration(registration);
-    }
-  }
+  // promptDelete(registration: IRegistration): void {
+  //   if (confirm(`Are you sure you want to delete the registration for ${registration.beneficiary}?`)) {
+  //     this.deleteRegistration(registration);
+  //   }
+  // }
   
   deleteRegistration(registration: IRegistration): void {
     if (!registration._id) return;

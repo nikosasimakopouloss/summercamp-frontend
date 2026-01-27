@@ -31,6 +31,19 @@ export interface IUser {
   updatedAt?: string;
 }
 
+
+export interface IBasicUser {
+  _id: string;
+  username: string;
+  firstname?: string;
+  lastname?: string;
+  amka: string;
+  email?: string;
+}
+
+
+
+
 export interface ILoggedInUser {
   _id?: string;
   username: string;

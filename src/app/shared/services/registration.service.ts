@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment.development';
-import { IRegistration } from '../interfaces/registration';
+import { IRegistration, IRegistrationResponse } from '../interfaces/registration';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +11,7 @@ export class RegistrationService {
 
   // Signals
   registrations = signal<IRegistration[]>([]);
+  registrationsResponse = signal<IRegistrationResponse[]>([]);
   currentRegistration = signal<IRegistration | null>(null);
   loading = signal<boolean>(false);
   error = signal<string>('');
@@ -30,15 +31,15 @@ export class RegistrationService {
     this.loading.set(true);
     this.error.set('');
     
-    return this.http.get<IRegistration[]>(
+    return this.http.get<IRegistrationResponse[]>(
       `${environment.apiUrl}/api/registrations/registrations`
     );
   }
 
   loadUserRegistrations(): void {
     this.getUserRegistrations().subscribe({
-      next: (registrations) => {
-        this.registrations.set(registrations);
+      next: (registrationsResponse) => {
+        this.registrationsResponse.set(registrationsResponse);
         this.loading.set(false);
       },
       error: (error) => {
