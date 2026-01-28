@@ -233,16 +233,16 @@
               <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>Όνομα</th>
-                    <th>Επώνυμο</th>
+                    <!-- <th>Όνομα</th>
+                    <th>Επώνυμο</th> -->
                     <th>AMKA</th>
                     <th>Ημ/νία Εγγραφής</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngFor="let camper of recentCampers">
-                    <td>{{ camper.firstname || '--' }}</td>
-                    <td>{{ camper.lastname || '--' }}</td>
+                    <!-- <td>{{ camper.firstname || '--' }}</td>
+                    <td>{{ camper.lastname || '--' }}</td> -->
                     <td>{{ camper.amka || '--' }}</td>
                     <td>{{ formatDate(camper.createdAt) }}</td>
                   </tr>
@@ -281,13 +281,13 @@
           <div class="card-body">
             <ol class="list-group list-group-numbered">
               <li class="list-group-item border-0">
-                <strong>Διαχείριση Χρηστών:</strong> Μπορείτε να δημιουργήσετε, επεξεργαστείτε και να διαγράψετε χρήστες.
+                <strong>Διαχείριση Χρηστών:</strong> Μπορείτε να δημιουργήσετε, επεξαργαστείτε και να διαγράψετε χρήστες.
               </li>
               <li class="list-group-item border-0">
-                <strong>Διαχείριση Κατασκηνωτών:</strong> Προβολή όλων των κατασκηνωτών και επεξεργασία στοιχείων.
+                <strong>Διαχείριση Κατασκηνωτών:</strong> Προβολή όλων των κατασκηνωτών και διαγραφή.
               </li>
               <li class="list-group-item border-0">
-                <strong>Διαχείριση Εγγραφών:</strong> Έγκριση ή απόρριψη αιτήσεων κατασκηνώσεων.
+                <strong>Διαχείριση Εγγραφών:</strong> Προβολή ή διαγραφή αιτήσεων κατασκηνώσεων.
               </li>
               <li class="list-group-item border-0">
                 <strong>Στατιστικά:</strong> Προβολή στατιστικών στοιχείων του συστήματος.
