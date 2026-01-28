@@ -3,7 +3,7 @@
   <div class="header">
     <div class="title-section">
       <h1>
-        <i class="fas fa-users-cog"></i> User Management
+        <i class="fas fa-users-cog"></i> Διαχείριση Χρηστών
       </h1>
       <p class="subtitle">Manage parent and administrator accounts</p>
     </div>
@@ -12,7 +12,7 @@
       <button 
         class="btn btn-primary"
         (click)="showAddUserForm()">
-        <i class="fas fa-user-plus"></i> Add User
+        <i class="fas fa-user-plus"></i> Προσθέστε Χρήστη
       </button>
       
       <button 
@@ -65,7 +65,7 @@
       </div>
       <div class="stat-content">
         <div class="stat-number">{{ stats().total }}</div>
-        <div class="stat-label">Total Users</div>
+        <div class="stat-label">Συνολικοί Χρήστες</div>
       </div>
     </div>
     
@@ -89,7 +89,7 @@
       </div>
     </div>
     
-    <div class="stat-card showing">
+    <!-- <div class="stat-card showing">
       <div class="stat-icon">
         <i class="fas fa-filter"></i>
       </div>
@@ -97,7 +97,7 @@
         <div class="stat-number">{{ stats().showing }}</div>
         <div class="stat-label">Showing</div>
       </div>
-    </div>
+    </div> -->
   </div>
 
   <!-- Loading State -->
@@ -130,7 +130,7 @@
           class="btn-sort"
           [class.active]="sortBy() === 'username'"
           (click)="changeSort('username')">
-          <i class="fas fa-user"></i> Username
+          <i class="fas fa-user"></i> Ανά Όνομα Χρήστη
           <i class="fas" [class.fa-sort-up]="sortAscending()" [class.fa-sort-down]="!sortAscending()"></i>
         </button>
         
@@ -167,9 +167,9 @@
       <table class="users-table">
         <thead>
           <tr>
-            <th>User</th>
-            <th>Contact</th>
-            <th>Role</th>
+            <th>Χρήστης</th>
+            <th>Στοιχεία Επικοινωνίας</th>
+            <th>Ρόλος</th>
             <th>Status</th>
             <th>Registrations</th>
             <th>Created</th>
@@ -232,12 +232,12 @@
             
             <td class="actions-cell">
               <div class="action-buttons">
-                <button 
+                <!-- <button 
                   class="btn-icon btn-view"
                   (click)="viewUserDetails(user)"
                   title="View Details">
                   <i class="fas fa-eye"></i>
-                </button>
+                </button> -->
                 
                 <button 
                   class="btn-icon btn-edit"

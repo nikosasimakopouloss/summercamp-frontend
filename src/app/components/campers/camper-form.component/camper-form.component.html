@@ -3,7 +3,7 @@
   <div class="header">
     <div class="back-nav">
       <a routerLink="/campers" class="back-link">
-        <i class="fas fa-arrow-left"></i> Back to Campers
+        <i class="fas fa-arrow-left"></i> Πίσω στο προφίλ
       </a>
     </div>
     
@@ -44,7 +44,7 @@
     <!-- Full Name -->
     <div class="form-group">
       <label for="fullName" class="required">
-        <i class="fas fa-user"></i> Full Name
+        <i class="fas fa-user"></i> Όνομα
       </label>
       <input
         type="text"
@@ -55,12 +55,12 @@
         [class.is-valid]="fullName?.valid && (fullName?.dirty || fullName?.touched)">
       
       <div *ngIf="fullName?.invalid && (fullName?.dirty || fullName?.touched)" class="invalid-feedback">
-        <div *ngIf="fullName?.errors?.['required']">Full name is required</div>
+        <div *ngIf="fullName?.errors?.['required']">Το όνομα είναι υποχρεωτικό</div>
         <div *ngIf="fullName?.errors?.['minlength']">
-          Name must be at least {{ fullName?.errors?.['minlength']?.requiredLength }} characters
+          Το όνομα πρέπει να είναι τουλάχιστον {{ fullName?.errors?.['minlength']?.requiredLength }} χαρακτήρες
         </div>
         <div *ngIf="fullName?.errors?.['maxlength']">
-          Name cannot exceed {{ fullName?.errors?.['maxlength']?.requiredLength }} characters
+          Δεν μπορεί να ξεπερνά {{ fullName?.errors?.['maxlength']?.requiredLength }} χαρακτήρες
         </div>
       </div>
     </div>
@@ -68,7 +68,7 @@
     <!-- Date of Birth -->
     <div class="form-group">
       <label for="dateOfBirth" class="required">
-        <i class="fas fa-birthday-cake"></i> Date of Birth
+        <i class="fas fa-birthday-cake"></i> Ημερομηνία Γέννησης
       </label>
       <input
         type="date"
@@ -80,7 +80,7 @@
         [class.is-valid]="dateOfBirth?.valid && (dateOfBirth?.dirty || dateOfBirth?.touched)">
       
       <div class="age-info" *ngIf="dateOfBirth?.value">
-        <span class="age-badge">{{ calculatedAge() }} years old</span>
+        <span class="age-badge">{{ calculatedAge() }} ετών</span>
         <span class="age-group">{{ ageGroup() }}</span>
       </div>
       
@@ -94,7 +94,7 @@
     <!-- AMKA -->
     <div class="form-group">
       <label for="amka" class="required">
-        <i class="fas fa-id-card"></i> AMKA (Social Security Number)
+        <i class="fas fa-id-card"></i> AMKA 
       </label>
       <input
         type="text"
@@ -117,21 +117,21 @@
       </div>
       
       <div *ngIf="amka?.invalid && (amka?.dirty || amka?.touched)" class="invalid-feedback">
-        <div *ngIf="amka?.errors?.['required']">AMKA is required</div>
+        <div *ngIf="amka?.errors?.['required']">AMKA απαραίτητο</div>
         <div *ngIf="amka?.errors?.['pattern'] || amka?.errors?.['minlength'] || amka?.errors?.['maxlength']">
-          AMKA must be exactly 11 digits
+          Το ΑΜΚΑ πρέπει να είναι τουλάχιστον 11 ψηφία
         </div>
       </div>
       
       <small class="form-text">
-        <i class="fas fa-info-circle"></i> AMKA (Social Security Number) is required for registration
+        <i class="fas fa-info-circle"></i> AMKA απαραίτητο
       </small>
     </div>
 
     <!-- Visitor Type -->
     <div class="form-group">
       <label for="visitorType" class="required">
-        <i class="fas fa-user-tag"></i> Visitor Type
+        <i class="fas fa-user-tag"></i> Τύπος Κατασκηνωτή
       </label>
       <select
         id="visitorType"
@@ -154,7 +154,7 @@
     <!-- Additional Info -->
     <div class="form-group">
       <label for="additionalInfo">
-        <i class="fas fa-file-alt"></i> Additional Information
+        <i class="fas fa-file-alt"></i> Επιπλέον πληροφορίες
       </label>
       <textarea
         id="additionalInfo"
@@ -165,7 +165,7 @@
         [class.is-valid]="additionalInfo?.valid && (additionalInfo?.dirty || additionalInfo?.touched)"></textarea>
       
       <div class="char-counter" *ngIf="additionalInfo?.value">
-        {{ additionalInfo?.value?.length || 0 }} / 500 characters
+        {{ additionalInfo?.value?.length || 0 }} / 500 χαρακτήρες
       </div>
       
       <div *ngIf="additionalInfo?.invalid && (additionalInfo?.dirty || additionalInfo?.touched)" class="invalid-feedback">
@@ -184,23 +184,23 @@
           formControlName="healthDeclarationAccepted"
           [class.is-invalid]="healthDeclarationAccepted?.invalid && (healthDeclarationAccepted?.dirty || healthDeclarationAccepted?.touched)">
         <label for="healthDeclarationAccepted" class="required checkbox-label">
-          <i class="fas fa-heartbeat"></i> Health Declaration Acceptance
+          <i class="fas fa-heartbeat"></i> Ιατρική βεβαίωση
         </label>
       </div>
       
       <div class="declaration-text">
-        <p>I hereby declare that:</p>
+        <p>Δηλώνω ότι:</p>
         <ul>
-          <li>The camper is in good health and able to participate in camp activities</li>
-          <li>I have disclosed all relevant medical information</li>
+          <li>Ο κατασκηνωτής είναι σε θέση να συμμετέχει στις κατασκηνωτικές δραστηριότητες</li>
+          <!-- <li>I have disclosed all relevant medical information</li>
           <li>I understand the camp's health and safety policies</li>
-          <li>I consent to emergency medical treatment if necessary</li>
+          <li>I consent to emergency medical treatment if necessary</li> -->
         </ul>
       </div>
       
       <div *ngIf="healthDeclarationAccepted?.invalid && (healthDeclarationAccepted?.dirty || healthDeclarationAccepted?.touched)" class="invalid-feedback">
         <div *ngIf="healthDeclarationAccepted?.errors?.['required']">
-          You must accept the health declaration
+          Πρέπει να δεχτείτε την ιατρική βεβαίωση
         </div>
       </div>
     </div>
@@ -212,7 +212,7 @@
         class="btn btn-outline"
         (click)="onCancel()"
         [disabled]="saving()">
-        <i class="fas fa-times"></i> Cancel
+        <i class="fas fa-times"></i> Άκυρο
       </button>
       
       <button

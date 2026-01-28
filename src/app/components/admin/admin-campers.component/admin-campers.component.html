@@ -33,12 +33,12 @@
             
             <button (click)="navigateToCreate()" class="btn btn-success">
               <i class="bi bi-plus-circle me-2"></i>
-              Νέα Κατασκηνώτρια
+              Νέoς Κατασκηνωτής
             </button>
             
             <button (click)="exportData()" class="btn btn-info">
               <i class="bi bi-download me-2"></i>
-              Εξαγωγή Δεδομένων
+              Export CSV
             </button>
             
             <a routerLink="/admin/dashboard" class="btn btn-secondary ms-auto">
@@ -318,11 +318,11 @@
                 <span class="badge bg-primary">
                   
                 </span>
-                <button  
+                <!-- <button  
                         (click)="navigateToRegistrations(camper._id)"
                         class="btn btn-link btn-sm text-decoration-none">
                   Προβολή
-                </button>
+                </button> -->
               </td>
               <td>
                 <span class="small">
@@ -331,7 +331,7 @@
               </td>
               <td>
                 <div class="btn-group">
-                  <button (click)="viewCamper(camper._id)" 
+                  <!-- <button (click)="viewCamper(camper._id)" 
                           class="btn btn-sm btn-outline-info"
                           title="Προβολή">
                     <i class="bi bi-eye"></i>
@@ -342,7 +342,7 @@
 
                           title="Επεξεργασία">
                     <i class="bi bi-pencil"></i>
-                  </button>
+                  </button> -->
                   <button (click)="promptDelete(camper)" 
                           class="btn btn-sm btn-outline-danger"
                           title="Διαγραφή">

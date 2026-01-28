@@ -3,7 +3,7 @@
   <div class="header">
     <div class="back-nav">
       <a routerLink="/registrations" class="back-link">
-        <i class="fas fa-arrow-left"></i> Back to Registrations
+        <i class="fas fa-arrow-left"></i> Πίσω στο προφίλ
       </a>
     </div>
     
@@ -57,11 +57,11 @@
     
     <!-- Camper Selection -->
     <div class="form-section">
-      <h3><i class="fas fa-child"></i> Camper Information</h3>
+      <h3><i class="fas fa-child"></i> ΣΤΟΙΧΕΙΑ ΚΑΤΑΣΚΗΝΩΤΗ</h3>
       
       <div class="form-group">
         <label for="camper" class="required">
-          <i class="fas fa-user"></i> Select Camper
+          <i class="fas fa-user"></i> Επιλέξτε Κατασκηνωτή
         </label>
         <select
           id="camper"
@@ -71,7 +71,7 @@
           >
           <option value="" disabled>Select a camper...</option>
           <option *ngFor="let camper of campers()" [value]="camper._id">
-            {{ camper.fullName }} ({{ getCamperAge(camper._id!) }} years old)
+            {{ camper.fullName }} ({{ getCamperAge(camper._id!) }} ετών)
           </option>
         </select>
         
@@ -85,11 +85,11 @@
             <span class="value">{{ selectedCamper()?.amka }}</span>
           </div>
           <div class="detail-item">
-            <span class="label">Date of Birth:</span>
+            <span class="label">Ημ/νία Γέννησης:</span>
             <span class="value">{{ selectedCamper()?.dateOfBirth | date:'mediumDate' }}</span>
           </div>
           <div class="detail-item">
-            <span class="label">Health Declaration:</span>
+            <span class="label">Ιατρική βεβαίωση:</span>
             <span class="value" [class.status-approved]="selectedCamper()?.healthDeclarationAccepted" [class.status-pending]="!selectedCamper()?.healthDeclarationAccepted">
               {{ selectedCamper()?.healthDeclarationAccepted ? 'Accepted ✓' : 'Pending ✗' }}
             </span>
@@ -100,12 +100,12 @@
 
     <!-- Camp Details -->
     <div class="form-section">
-      <h3><i class="fas fa-campground"></i> Camp Details</h3>
+      <h3><i class="fas fa-campground"></i> </h3>
       
       <div class="form-row">
         <div class="form-group">
           <label for="campType" class="required">
-            <i class="fas fa-tag"></i> Camp Type
+            <i class="fas fa-tag"></i> Κατασκήνωση
           </label>
           <select
             id="campType"
@@ -123,7 +123,7 @@
         
         <div class="form-group">
           <label for="campPeriod" class="required">
-            <i class="fas fa-calendar-alt"></i> Camp Period
+            <i class="fas fa-calendar-alt"></i> Περίοδος
           </label>
           <select
             id="campPeriod"
@@ -143,7 +143,7 @@
 
 
       <!-- Add this after the campPeriod dropdown -->
-<div class="alert alert-info">
+<!-- <div class="alert alert-info">
   <h6>Debug Camp Period:</h6>
   <p>Selected: {{ campPeriod?.value }}</p>
   <p>Available Options:</p>
@@ -152,12 +152,12 @@
       Value: "{{ period.value }}" | Label: {{ period.label }}
     </li>
   </ul>
-</div>
+</div> -->
 
 
 
 <!-- Add this debug section -->
-<div class="alert alert-danger mt-3">
+<!-- <div class="alert alert-danger mt-3">
   <h6>Form Validation Debug:</h6>
   <p>Form Valid: {{ registrationForm.valid }}</p>
   <p>Form Invalid: {{ registrationForm.invalid }}</p>
@@ -173,7 +173,7 @@
       Errors = {{control.errors | json}}
     </li>
   </ul>
-</div>
+</div> -->
 
 
 
@@ -199,11 +199,11 @@
 
     <!-- Beneficiary Information -->
     <div class="form-section">
-      <h3><i class="fas fa-user-check"></i> Beneficiary Information</h3>
+      <h3><i class="fas fa-user-check"></i> ΣΤΟΙΧΕΙΑ ΔΙΚΑΙΟΥΧΟΥ</h3>
       
       <div class="form-group">
         <label for="beneficiary" class="required">
-          <i class="fas fa-user-circle"></i> Beneficiary Name
+          <i class="fas fa-user-circle"></i> Τύπος Δικαιούχου
         </label>
         <!-- <input
           type="text"
@@ -235,19 +235,19 @@
         </div>
         
         <small class="form-text">
-          <i class="fas fa-info-circle"></i> This should match the camper's full name
+          <i class="fas fa-info-circle"></i> (Γονέας)
         </small>
       </div>
     </div>
 
     <!-- Parent Information -->
     <div class="form-section">
-      <h3><i class="fas fa-users"></i> Parent/Guardian Information</h3>
+      <h3><i class="fas fa-users"></i> ΓΟΝΕΙΣ</h3>
       
       <div class="form-row">
         <div class="form-group">
           <label for="motherName" class="required">
-            <i class="fas fa-female"></i> Mother's Name
+            <i class="fas fa-female"></i> Όνομα Μητέρας
           </label>
           <input
             type="text"
@@ -270,7 +270,7 @@
         
         <div class="form-group">
           <label for="fatherName" class="required">
-            <i class="fas fa-male"></i> Father's Name
+            <i class="fas fa-male"></i> Όνομα Πατέρα
           </label>
           <input
             type="text"
@@ -295,7 +295,7 @@
 
     <!-- Additional Information -->
     <div class="form-section">
-      <h3><i class="fas fa-info-circle"></i> Additional Information</h3>
+      <h3><i class="fas fa-info-circle"></i> Επιπλέον Πληροφορίες</h3>
       
       <div class="form-row">
         <div class="form-group">
