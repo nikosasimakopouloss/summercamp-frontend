@@ -61,14 +61,40 @@ export class AdminCampersComponent implements OnInit {
     const ascending = this.sortAscending();
     
     // Apply search filter
-    if (search) {
-      campers = campers.filter(camper =>
-        (camper.fullName?.toLowerCase().includes(search) || false) ||
-        (camper.amka?.includes(search) || false) ||
-        (camper.additionalInfo?.toLowerCase().includes(search) || false) ||
-        (camper.parent?.toLowerCase().includes(search) || false)
-      );
-    }
+    // if (search) {
+    //   campers = campers.filter(camper =>
+    //     (camper.fullName?.toLowerCase().includes(search) || false) ||
+    //     (camper.amka?.includes(search) || false) ||
+    //     (camper.additionalInfo?.toLowerCase().includes(search) || false) ||
+    //     (camper.parent?.toLowerCase().includes(search) || false)
+    //   );
+    // }
+
+     // Apply search filter
+if (search) {
+  campers = campers.filter(camper => {
+    const parentDisplay = this.getParentDisplay(camper.parent).toLowerCase();
+    const parentEmail = this.getParentEmail(camper.parent).toLowerCase();
+    
+    return (
+      (camper.fullName?.toLowerCase().includes(search) || false) ||
+      (camper.amka?.includes(search) || false) ||
+      (camper.additionalInfo?.toLowerCase().includes(search) || false) ||
+      (parentDisplay.includes(search) || false) ||
+      (parentEmail.includes(search) || false)
+    );
+  });
+}
+
+
+
+
+
+
+
+
+
+
     
     // Apply age filter if set
     if (filter) {
