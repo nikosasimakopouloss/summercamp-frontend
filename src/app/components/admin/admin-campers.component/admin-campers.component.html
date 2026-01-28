@@ -253,7 +253,7 @@
               <td>
                 <code>{{ camper.amka || '--' }}</code>
               </td>
-              <td>
+              <!-- <td>
                 <div *ngIf="camper.parent">
                   <a href="javascript:void(0)" 
                      (click)="viewUserProfile(camper.parent)"
@@ -265,7 +265,45 @@
                   </div>
                 </div>
                 <span *ngIf="!camper.parent" class="text-muted">--</span>
-              </td>
+              </td> -->
+
+
+             <td>
+  <div *ngIf="camper.parent">
+    <a href="javascript:void(0)" 
+       (click)="viewUserProfile(getParentId(camper.parent))"
+       class="text-decoration-none"
+       *ngIf="getParentId(camper.parent)">
+      {{ getParentDisplay(camper.parent) }}
+    </a>
+    <span *ngIf="!getParentId(camper.parent)">
+      {{ getParentDisplay(camper.parent) }}
+    </span>
+    <div *ngIf="getParentEmail(camper.parent)" class="small text-muted">
+      {{ getParentEmail(camper.parent) }}
+    </div>
+    <div class="small text-muted">
+      ID: {{ getParentId(camper.parent) | slice:0:8 }}...
+    </div>
+  </div>
+  <span *ngIf="!camper.parent" class="text-muted">--</span>
+</td>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
               <td>
                 <span class="badge" [ngClass]="{
                   'bg-info': getAgeGroup(camper.dateOfBirth) === 'Preschool (0-5)',
@@ -300,6 +338,8 @@
                   </button>
                   <button (click)="editCamper(camper._id)" 
                           class="btn btn-sm btn-outline-primary"
+                      
+
                           title="Επεξεργασία">
                     <i class="bi bi-pencil"></i>
                   </button>

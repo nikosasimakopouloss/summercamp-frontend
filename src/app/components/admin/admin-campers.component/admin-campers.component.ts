@@ -347,4 +347,57 @@ export class AdminCampersComponent implements OnInit {
     // TODO: Implement this method based on your registration data
     return 0; // Placeholder
   }
+
+
+
+  // Add these methods to your AdminCampersComponent class:
+
+// Helper to safely get parent display name
+getParentDisplay(parent: any): string {
+  if (!parent) return '--';
+  
+  // If parent is a string (ID), return it
+  if (typeof parent === 'string') return parent;
+  
+  // If parent is an object with name properties
+  if (typeof parent === 'object') {
+    if (parent.firstname && parent.lastname) {
+      return `${parent.firstname} ${parent.lastname}`;
+    }
+    if (parent.username) return parent.username;
+    if (parent.email) return parent.email;
+  }
+  
+  return '--';
+}
+
+// Helper to get parent ID safely
+getParentId(parent: any): string {
+  if (!parent) return '';
+  
+  if (typeof parent === 'string') return parent;
+  if (typeof parent === 'object' && parent._id) return parent._id;
+  
+  return '';
+}
+
+// Helper to get parent email
+getParentEmail(parent: any): string {
+  if (!parent || typeof parent !== 'object') return '';
+  return parent.email || '';
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

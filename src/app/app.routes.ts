@@ -130,7 +130,24 @@ export const routes: Routes = [
         { 
           path: 'registrations', 
           loadComponent: () => import('./components/admin/admin-registrations.component/admin-registrations.component').then(m => m.AdminRegistrationsComponent)
-        }
+        },
+
+
+        { 
+      path: 'campers/edit/:id', 
+      loadComponent: () => import('./components/admin/admin-camper-edit.component/admin-camper-edit.component').then(m => m.AdminCamperEditComponent)
+    }
+
+
+
+
+
+
+
+
+
+
+
       ]
     }
   ]

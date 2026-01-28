@@ -1,3 +1,4 @@
+import { IUser } from "./user";
 
 export interface ICamper {
   _id?: string;
@@ -7,7 +8,7 @@ export interface ICamper {
   visitorType: string;  // e.g., 'child', 'adult'
   additionalInfo?: string;
   healthDeclarationAccepted: boolean;
-  parent: string;  // User ID
+  parent: string ;  // User ID
   createdAt?: string;
   updatedAt?: string;
 }

@@ -1,0 +1,209 @@
+<div class="camper-form-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="back-nav">
+      <a routerLink="/admin/dashboard/campers" class="back-link">
+        <i class="fas fa-arrow-left"></i> Πίσω στους Κατασκηνωτές
+      </a>
+    </div>
+    
+    <div class="title-section">
+      <h1>
+        <i class="fas fa-user-edit"></i>
+        Επεξεργασία Κατασκηνωτή
+      </h1>
+      <p class="subtitle">
+        Ενημέρωση στοιχείων κατασκηνωτή
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <p>Φόρτωση στοιχείων...</p>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error() && !loading()" class="error-alert">
+    <div class="alert-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <div class="alert-content">
+      <h4>Σφάλμα</h4>
+      <p>{{ error() }}</p>
+    </div>
+    <button class="btn btn-sm btn-outline" (click)="error.set('')">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Form -->
+  <form *ngIf="!loading()" [formGroup]="camperForm" (ngSubmit)="onSubmit()" class="camper-form">
+    
+    <!-- Full Name -->
+    <div class="form-group">
+      <label for="fullName" class="required">
+        <i class="fas fa-user"></i> Ονοματεπώνυμο
+      </label>
+      <input
+        type="text"
+        id="fullName"
+        formControlName="fullName"
+        placeholder="Εισάγετε ονοματεπώνυμο"
+        [class.is-invalid]="fullName?.invalid && (fullName?.dirty || fullName?.touched)"
+        [class.is-valid]="fullName?.valid && (fullName?.dirty || fullName?.touched)">
+      
+      <div *ngIf="fullName?.invalid && (fullName?.dirty || fullName?.touched)" class="invalid-feedback">
+        <div *ngIf="fullName?.errors?.['required']">Το ονοματεπώνυμο είναι απαραίτητο</div>
+        <div *ngIf="fullName?.errors?.['minlength']">
+          Τουλάχιστον {{ fullName?.errors?.['minlength']?.requiredLength }} χαρακτήρες
+        </div>
+        <div *ngIf="fullName?.errors?.['maxlength']">
+          Μέχρι {{ fullName?.errors?.['maxlength']?.requiredLength }} χαρακτήρες
+        </div>
+      </div>
+    </div>
+
+    <!-- Date of Birth -->
+    <div class="form-group">
+      <label for="dateOfBirth" class="required">
+        <i class="fas fa-birthday-cake"></i> Ημερομηνία Γέννησης
+      </label>
+      <input
+        type="date"
+        id="dateOfBirth"
+        formControlName="dateOfBirth"
+        [max]="maxDate"
+        [min]="minDate"
+        [class.is-invalid]="dateOfBirth?.invalid && (dateOfBirth?.dirty || dateOfBirth?.touched)"
+        [class.is-valid]="dateOfBirth?.valid && (dateOfBirth?.dirty || dateOfBirth?.touched)">
+      
+      <div class="age-info" *ngIf="dateOfBirth?.value">
+        <span class="age-badge">{{ calculatedAge() }} ετών</span>
+        <span class="age-group">{{ ageGroup() }}</span>
+      </div>
+      
+      <div *ngIf="dateOfBirth?.invalid && (dateOfBirth?.dirty || dateOfBirth?.touched)" class="invalid-feedback">
+        <div *ngIf="dateOfBirth?.errors?.['required']">Η ημερομηνία γέννησης είναι απαραίτητη</div>
+        <div *ngIf="dateOfBirth?.errors?.['futureDate']">Η ημερομηνία δεν μπορεί να είναι στο μέλλον</div>
+        <div *ngIf="dateOfBirth?.errors?.['invalidAge']">Παρακαλώ εισάγετε έγκυρη ημερομηνία</div>
+      </div>
+    </div>
+
+    <!-- AMKA (Disabled in Edit Mode) -->
+    <div class="form-group">
+      <label for="amka" class="required">
+        <i class="fas fa-id-card"></i> ΑΜΚΑ
+      </label>
+      <input
+        type="text"
+        id="amka"
+        formControlName="amka"
+        placeholder="11-ψήφιος ΑΜΚΑ"
+        readonly
+        class="readonly-field">
+      
+      <small class="form-text">
+        <i class="fas fa-info-circle"></i> Το ΑΜΚΑ δεν μπορεί να αλλάξει
+      </small>
+    </div>
+
+    <!-- Visitor Type -->
+    <div class="form-group">
+      <label for="visitorType" class="required">
+        <i class="fas fa-user-tag"></i> Τύπος Κατασκηνωτή
+      </label>
+      <select
+        id="visitorType"
+        formControlName="visitorType"
+        [class.is-invalid]="visitorType?.invalid && (visitorType?.dirty || visitorType?.touched)">
+        <option *ngFor="let type of visitorTypes" [value]="type.value">
+          {{ type.label }}
+        </option>
+      </select>
+      
+      <div *ngIf="visitorType?.invalid && (visitorType?.dirty || visitorType?.touched)" class="invalid-feedback">
+        <div *ngIf="visitorType?.errors?.['required']">Ο τύπος κατασκηνωτή είναι απαραίτητος</div>
+      </div>
+    </div>
+
+    <!-- Additional Info -->
+    <div class="form-group">
+      <label for="additionalInfo">
+        <i class="fas fa-file-alt"></i> Επιπλέον Πληροφορίες
+      </label>
+      <textarea
+        id="additionalInfo"
+        formControlName="additionalInfo"
+        placeholder="Αλλεργίες, ιατρικές πληροφορίες, ειδικές ανάγκες κλπ."
+        rows="3"
+        [class.is-invalid]="additionalInfo?.invalid && (additionalInfo?.dirty || additionalInfo?.touched)"
+        [class.is-valid]="additionalInfo?.valid && (additionalInfo?.dirty || additionalInfo?.touched)"></textarea>
+      
+      <div class="char-counter" *ngIf="additionalInfo?.value">
+        {{ additionalInfo?.value?.length || 0 }} / 500 χαρακτήρες
+      </div>
+      
+      <div *ngIf="additionalInfo?.invalid && (additionalInfo?.dirty || additionalInfo?.touched)" class="invalid-feedback">
+        <div *ngIf="additionalInfo?.errors?.['maxlength']">
+          Μέχρι 500 χαρακτήρες
+        </div>
+      </div>
+    </div>
+
+    <!-- Health Declaration -->
+    <div class="form-group health-declaration">
+      <div class="checkbox-container">
+        <input
+          type="checkbox"
+          id="healthDeclarationAccepted"
+          formControlName="healthDeclarationAccepted"
+          [class.is-invalid]="healthDeclarationAccepted?.invalid && (healthDeclarationAccepted?.dirty || healthDeclarationAccepted?.touched)">
+        <label for="healthDeclarationAccepted" class="required checkbox-label">
+          <i class="fas fa-heartbeat"></i> Υπεύθυνη Δήλωση Υγείας
+        </label>
+      </div>
+      
+      <div class="declaration-text">
+        <p>Δηλώνω ότι:</p>
+        <ul>
+          <li>Ο/η κατασκηνωτής είναι σε καλή υγεία</li>
+          <li>Έχουν γνωστοποιηθεί όλες οι σχετικές ιατρικές πληροφορίες</li>
+          <li>Κατανοώ τους κανόνες υγείας και ασφάλειας της κατασκήνωσης</li>
+          <li>Συμφωνώ σε επείγουσα ιατρική περίθαλψη εάν χρειαστεί</li>
+        </ul>
+      </div>
+      
+      <div *ngIf="healthDeclarationAccepted?.invalid && (healthDeclarationAccepted?.dirty || healthDeclarationAccepted?.touched)" class="invalid-feedback">
+        <div *ngIf="healthDeclarationAccepted?.errors?.['required']">
+          Απαιτείται αποδοχή της δήλωσης
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="onCancel()"
+        [disabled]="saving()">
+        <i class="fas fa-times"></i> Ακύρωση
+      </button>
+      
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="camperForm.invalid || saving()">
+        <span *ngIf="saving()">
+          <i class="fas fa-spinner fa-spin"></i> Αποθήκευση...
+        </span>
+        <span *ngIf="!saving()">
+          <i class="fas fa-save"></i>
+          Ενημέρωση Κατασκηνωτή
+        </span>
+      </button>
+    </div>
+  </form>
+</div>
