@@ -285,7 +285,18 @@ export class AdminCampersComponent implements OnInit {
       camper.fullName || '',
       this.calculateAge(camper.dateOfBirth),
       camper.amka || '',
-      camper.parent || '',
+
+    
+     this.getParentDisplay(camper.parent),
+    this.getParentEmail(camper.parent),
+    this.getAgeGroup(camper.dateOfBirth),
+
+
+
+
+
+
+      // camper.parent || '',
       this.getAgeGroup(camper.dateOfBirth),
       camper.createdAt ? new Date(camper.createdAt).toLocaleDateString('el-GR') : ''
     ]);
