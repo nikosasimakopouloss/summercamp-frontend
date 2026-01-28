@@ -211,7 +211,7 @@
               </div>
             </td>
             
-            <td class="camper-parent-cell">
+            <!-- <td class="camper-parent-cell">
               <div class="camper-info">
                 <div class="avatar">{{ getCamperName(registration.camper).charAt(0) }}</div>
                 <div>
@@ -227,7 +227,43 @@
                 <div class="parent-name">{{ getUserName(registration.user) }}</div>
                 <div class="parent-id">User ID: {{ registration.user?.substring(0, 8) }}...</div>
               </div>
-            </td>
+            </td> -->
+
+
+
+          <!-- In the camper-parent-cell section, replace: -->
+<td class="camper-parent-cell">
+  <div class="camper-info">
+    <div class="avatar">{{ getCamperDisplay(registration.camper).charAt(0) }}</div>
+    <div>
+      <div class="camper-name">{{ getCamperDisplay(registration.camper) }}</div>
+      <div class="camper-age">{{ getCamperAge(registration.camper) }} έτη</div>
+    </div>
+  </div>
+  
+  <div class="parent-info">
+    <div class="parent-label">
+      <i class="fas fa-user"></i> Γονέας:
+    </div>
+    <div class="parent-name">{{ getUserDisplay(registration.user) }}</div>
+    <div class="parent-email small text-muted" *ngIf="getUserEmail(registration.user)">
+      {{ getUserEmail(registration.user) }}
+    </div>
+    <div class="parent-id small text-muted">
+      ID: {{ getUserId(registration.user) | slice:0:8 }}...
+    </div>
+  </div>
+</td>
+
+
+
+
+
+
+
+
+
+
             
             <td class="camp-info-cell">
               <div class="camp-type">

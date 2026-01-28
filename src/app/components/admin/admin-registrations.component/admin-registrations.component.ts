@@ -12,7 +12,7 @@ import { UserService } from '../../../shared/services/user.service';
 // Interfaces
 import { IRegistration } from '../../../shared/interfaces/registration';
 import { ICamper } from '../../../shared/interfaces/camper';
-import { IUser } from '../../../shared/interfaces/user';
+import { IBasicUser, IUser } from '../../../shared/interfaces/user';
 
 @Component({
   selector: 'app-admin-registrations',
@@ -58,25 +58,51 @@ export class AdminRegistrationsComponent implements OnInit {
     let registrations = [...this.allRegistrations()];
     const search = this.searchTerm().toLowerCase().trim();
     const filters = this.filterForm?.value || {};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     // Apply search filter
-    if (search) {
-      registrations = registrations.filter(reg => {
-        const camper = this.getCamper(reg.camper);
-        const user = this.getUser(reg.user);
+    // if (search) {
+    //   registrations = registrations.filter(reg => {
+    //     const camper = this.getCamper(reg.camper);
+    //     const user = this.getUser(reg.user);
         
-        return (
-          reg.beneficiary?.toLowerCase().includes(search) ||
-          reg.motherName?.toLowerCase().includes(search) ||
-          reg.fatherName?.toLowerCase().includes(search) ||
-          reg.amka?.includes(search) ||
-          camper?.fullName?.toLowerCase().includes(search) ||
-          user?.username?.toLowerCase().includes(search) ||
-          user?.email?.toLowerCase().includes(search) ||
-          reg.notes?.toLowerCase().includes(search)
-        );
-      });
-    }
+    //     return (
+    //       reg.beneficiary?.toLowerCase().includes(search) ||
+    //       reg.motherName?.toLowerCase().includes(search) ||
+    //       reg.fatherName?.toLowerCase().includes(search) ||
+    //       reg.amka?.includes(search) ||
+    //       camper?.fullName?.toLowerCase().includes(search) ||
+    //       user?.username?.toLowerCase().includes(search) ||
+    //       user?.email?.toLowerCase().includes(search) ||
+    //       reg.notes?.toLowerCase().includes(search)
+    //     );
+    //   });
+    // }
+
+
+   
+
+
+
+
+
+
     
     // Apply filters
     if (filters.campType) {
@@ -216,39 +242,60 @@ export class AdminRegistrationsComponent implements OnInit {
   }
   
   // Helper methods
-  getCamper(camperId: string): ICamper | undefined {
+  // getCamper(camperId: string): ICamper | undefined {
+  //   return this.allCampers().find(c => c._id === camperId);
+  // }
+  
+  // getUser(userId: string): IUser | undefined {
+  //   return this.allUsers().find(u => u._id === userId);
+  // }
+
+getCamper(camperId: string | ICamper): ICamper | undefined {
+  if (typeof camperId === 'string') {
     return this.allCampers().find(c => c._id === camperId);
   }
-  
-  getUser(userId: string): IUser | undefined {
+  return camperId;
+}
+
+getUser(userId: string | IBasicUser | IUser): IUser | IBasicUser | undefined {
+  if (typeof userId === 'string') {
     return this.allUsers().find(u => u._id === userId);
   }
+  return userId;
+}
+
+
+
+
+
+
+
   
-  getCamperName(camperId: string): string {
-    const camper = this.getCamper(camperId);
-    return camper?.fullName || 'Unknown Camper';
-  }
+  // getCamperName(camperId: string): string {
+  //   const camper = this.getCamper(camperId);
+  //   return camper?.fullName || 'Unknown Camper';
+  // }
   
-  getUserName(userId: string): string {
-    const user = this.getUser(userId);
-    return user?.username || 'Unknown User';
-  }
+  // getUserName(userId: string): string {
+  //   const user = this.getUser(userId);
+  //   return user?.username || 'Unknown User';
+  // }
   
-  getCamperAge(camperId: string): number {
-    const camper = this.getCamper(camperId);
-    if (!camper?.dateOfBirth) return 0;
+  // getCamperAge(camperId: string): number {
+  //   const camper = this.getCamper(camperId);
+  //   if (!camper?.dateOfBirth) return 0;
     
-    const birthDate = new Date(camper.dateOfBirth);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
+  //   const birthDate = new Date(camper.dateOfBirth);
+  //   const today = new Date();
+  //   let age = today.getFullYear() - birthDate.getFullYear();
+  //   const monthDiff = today.getMonth() - birthDate.getMonth();
     
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
+  //   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+  //     age--;
+  //   }
     
-    return age;
-  }
+  //   return age;
+  // }
   
   formatCampPeriod(period: string): string {
     if (!period) return 'N/A';
@@ -445,41 +492,204 @@ export class AdminRegistrationsComponent implements OnInit {
   }
   
   // Export to CSV
-  exportToCSV(): void {
-    const headers = [
-      'ID', 'Camper', 'Parent', 'Camp Type', 'Camp Period',
-      'Beneficiary', 'Mother', 'Father', 'Registration Date',
-      'Status', 'Timeline', 'Notes'
-    ];
+  // exportToCSV(): void {
+  //   const headers = [
+  //     'ID', 'Camper', 'Parent', 'Camp Type', 'Camp Period',
+  //     'Beneficiary', 'Mother', 'Father', 'Registration Date',
+  //     'Status', 'Timeline', 'Notes'
+  //   ];
     
-    const data = this.filteredRegistrations().map(reg => [
-      reg._id?.substring(0, 8) || '',
-      this.getCamperName(reg.camper),
-      this.getUserName(reg.user),
-      this.getCampTypeText(reg.campType),
-      this.formatCampPeriod(reg.campPeriod),
-      reg.beneficiary || '',
-      reg.motherName || '',
-      reg.fatherName || '',
-      reg.registrationDate ? new Date(reg.registrationDate).toLocaleDateString() : '',
-      this.getStatusText(reg.isActive),
-      this.getTimelineStatusText(reg),
-      reg.notes || ''
-    ]);
+  //   const data = this.filteredRegistrations().map(reg => [
+  //     reg._id?.substring(0, 8) || '',
+  //     this.getCamperName(reg.camper),
+  //     this.getUserName(reg.user),
+  //     this.getCampTypeText(reg.campType),
+  //     this.formatCampPeriod(reg.campPeriod),
+  //     reg.beneficiary || '',
+  //     reg.motherName || '',
+  //     reg.fatherName || '',
+  //     reg.registrationDate ? new Date(reg.registrationDate).toLocaleDateString() : '',
+  //     this.getStatusText(reg.isActive),
+  //     this.getTimelineStatusText(reg),
+  //     reg.notes || ''
+  //   ]);
     
-    const csvContent = [
-      headers.join(','),
-      ...data.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
+  //   const csvContent = [
+  //     headers.join(','),
+  //     ...data.map(row => row.map(cell => `"${cell}"`).join(','))
+  //   ].join('\n');
     
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `registrations_${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+  //   const blob = new Blob([csvContent], { type: 'text/csv' });
+  //   const url = window.URL.createObjectURL(blob);
+  //   const a = document.createElement('a');
+  //   a.href = url;
+  //   a.download = `registrations_${new Date().toISOString().split('T')[0]}.csv`;
+  //   a.click();
+  //   window.URL.revokeObjectURL(url);
+  // }
+
+
+
+// Helper to safely get camper display name
+getCamperDisplay(camper: string | ICamper | undefined): string {
+  if (!camper) return 'Άγνωστος Κατασκηνωτής';
+  
+  if (typeof camper === 'string') {
+    // It's just an ID, try to find in campers list
+    const foundCamper = this.allCampers().find(c => c._id === camper);
+    return foundCamper?.fullName || `ID: ${camper.substring(0, 8)}...`;
   }
+  
+  // It's a populated camper object
+  return camper.fullName || 'Άγνωστος Κατασκηνωτής';
+}
+
+// Helper to safely get camper object (if populated) or ID
+getCamperId(camper: string | ICamper | undefined): string {
+  if (!camper) return '';
+  
+  if (typeof camper === 'string') {
+    return camper;
+  }
+  
+  return camper._id || '';
+}
+
+// Helper to safely get user display name
+getUserDisplay(user: string | IBasicUser | IUser |undefined): string {
+  if (!user) return 'Άγνωστος Χρήστης';
+  
+  if (typeof user === 'string') {
+    // It's just an ID, try to find in users list
+    const foundUser = this.allUsers().find(u => u._id === user);
+    return foundUser?.username || `ID: ${user.substring(0, 8)}...`;
+  }
+  
+  // It's a populated user object
+  if (user.firstname && user.lastname) {
+    return `${user.firstname} ${user.lastname}`;
+  }
+  
+  return user.username || 'Άγνωστος Χρήστης';
+}
+
+// Helper to safely get user object (if populated) or ID
+getUserId(user: string | IBasicUser | IUser | undefined): string {
+  if (!user) return '';
+  
+  if (typeof user === 'string') {
+    return user;
+  }
+  
+  return user._id || '';
+}
+
+// Helper to get user email
+getUserEmail(user: string | IBasicUser | IUser |undefined): string {
+  if (!user || typeof user === 'string') return '';
+  return user.email || '';
+}
+
+// Update the existing getCamperName method to use helper
+getCamperName(camperId: string | ICamper): string {
+  if (typeof camperId === 'string') {
+    const camper = this.getCamper(camperId);
+    return camper?.fullName || 'Unknown Camper';
+  }
+  return this.getCamperDisplay(camperId);
+}
+
+// Update the existing getUserName method to use helper
+getUserName(userId: string | IBasicUser | IUser): string {
+  if (typeof userId === 'string') {
+    const user = this.getUser(userId);
+    return user?.username || 'Unknown User';
+  }
+  return this.getUserDisplay(userId);
+}
+
+// Update getCamperAge to handle both string and object
+getCamperAge(camperId: string | ICamper): number {
+  let camper: ICamper | undefined;
+  
+  if (typeof camperId === 'string') {
+    camper = this.getCamper(camperId);
+  } else {
+    camper = camperId;
+  }
+  
+  if (!camper?.dateOfBirth) return 0;
+  
+  const birthDate = new Date(camper.dateOfBirth);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  
+  return age;
+}
+
+
+
+
+
+
+
+exportToCSV(): void {
+  const headers = [
+    'ID', 'Κατασκηνωτής', 'Γονέας', 'Τύπος Κατασκήνωσης', 'Περίοδος',
+    'Οφελούμενος', 'Μητέρα', 'Πατέρας', 'Ημερομηνία Εγγραφής',
+    'Κατάσταση', 'Περίοδος', 'Σημειώσεις'
+  ];
+  
+  const data = this.filteredRegistrations().map(reg => [
+    reg._id?.substring(0, 8) || '',
+    this.getCamperDisplay(reg.camper),
+    this.getUserDisplay(reg.user),
+    this.getCampTypeText(reg.campType),
+    this.formatCampPeriod(reg.campPeriod),
+    reg.beneficiary || '',
+    reg.motherName || '',
+    reg.fatherName || '',
+    reg.registrationDate ? new Date(reg.registrationDate).toLocaleDateString('el-GR') : '',
+    this.getStatusText(reg.isActive),
+    this.getTimelineStatusText(reg),
+    reg.notes || ''
+  ]);
+  
+  const csvContent = [
+    headers.join(','),
+    ...data.map(row => row.map(cell => `"${cell}"`).join(','))
+  ].join('\n');
+  
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `εγγραφές_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
+
+viewUserProfile(user: string | IBasicUser | undefined): void {
+  const userId = this.getUserId(user);
+  if (userId) {
+    this.router.navigate(['/admin/users', userId]);
+  }
+}
+
+
+
+
+
+
+
+
+
   
   // Refresh data
   refresh(): void {

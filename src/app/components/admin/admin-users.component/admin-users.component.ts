@@ -8,7 +8,7 @@ import { UserService } from '../../../shared/services/user.service';
 import { RegistrationService } from '../../../shared/services/registration.service';
 
 // Interfaces
-import { IUser, ILoggedInUser } from '../../../shared/interfaces/user';
+import { IUser, ILoggedInUser, IBasicUser } from '../../../shared/interfaces/user';
 import { IRegistration } from '../../../shared/interfaces/registration';
 
 // Components
@@ -210,10 +210,10 @@ export class AdminUsersComponent implements OnInit {
     });
   }
   
-  private loadUserRegistrations(users: IUser[]): void {
+  private loadUserRegistrations(users: IUser[] ): void {
     // Load all registrations to count per user
     this.registrationService.getAllRegistrations().subscribe({
-      next: (registrations) => {
+      next: (registrations: any[]) => {
         const regCountMap = new Map<string, number>();
         
         // Count registrations per user
