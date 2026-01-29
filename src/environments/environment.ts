@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl:'https://summercamp-backend.onrender.com/'
+  apiUrl:'https://summercamp-backend.onrender.com'
 };
