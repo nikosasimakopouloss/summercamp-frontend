@@ -1,90 +1,43 @@
+# Διαχείριση Αιτήσεων για Παιδικές Κατασκηνώσεις
 
-# ΔΙΑΧΕΙΡΙΣΗ ΑΙΤΗΣΕΩΝ ΓΙΑ ΠΑΙΔΙΚΕΣ ΚΑΤΑΣΚΗΝΩΣΕΙΣ 
+## Πρόσβαση στην εφαρμογή
+- **Live Demo (Frontend):** [https://nikosasimakopouloss.github.io/summercamp-frontend/](https://nikosasimakopouloss.github.io/summercamp-frontend/)
+- **Backend Repository:** [https://github.com/nikosasimakopouloss/summercamp-backend/tree/my-project-summercamp](https://github.com/nikosasimakopouloss/summercamp-backend/tree/my-project-summercamp)
 
--User: Γονέας που κάνει αίτηση στην κατασκήνωση για το παιδί του.
--Admin: Διαχειριστής χρηστών, αιτήσεων, κατασκηνωτών.
+**Σημείωση:** Η εφαρμογή δεν βρίσκεται στο main branch, καθώς σχεδιάζεται να συνεχιστεί η ανάπτυξή της για προσωπική χρήση μετά την παράδοση.
 
+---
 
+## Ρόλοι Χρηστών
 
- 1.  LINK:
+### 👤 Γονέας
+Ο χρήστης που κάνει αίτηση για την εγγραφή του παιδιού του σε παιδική κατασκήνωση.
 
- Η εργασία βρίσκεται σε αυτό το Link:
+### ⚙️ Διαχειριστής (Admin)
+Ο διαχειριστής που έχει πρόσβαση στη διαχείριση:
+- Χρηστών
+- Αιτήσεων
+- Κατασκηνωτών
 
+---
 
-https://nikosasimakopouloss.github.io/summercamp-frontend/
+## Τεχνολογίες Ανάπτυξης
 
+### 🔨 Build
+- **Frontend:** Angular
+- **Backend:** Node.js
+- **Backend Testing:** Jest
+- **Backend Documentation:** Swagger
+- **Database:** MongoDB (NoSQL)
 
-Το αναγράφω εδώ καθώς δεν είναι στο main branch (θα ήθελα να τη συνεχίσω και μετά την παράδοση για προσωπική χρήση.)
+### 🚀 Deploy
+- **Frontend:** GitHub Pages (μέσω Angular)
+- **Backend:** Render
+- **Backend Testing:** Jest
+- **Backend Documentation:** Swagger
 
+---
 
-1.1 Backend Repository Link:
+## 🔐 Πληροφορίες Πρόσβασης Διαχειριστή
 
-
-https://github.com/nikosasimakopouloss/summercamp-backend/tree/my-project-summercamp
-
-
-
-
-
-
-
-
-2. BUILD:
-
-
-
- Το project έγινε build κάνοντας χρήση: 
-
-
-Frontend: "Angular"
-
-Backend:   "Node.js" 
-
-           Test backend με "Jest"
-         
-           Backend Documentation με "Swagger" 
-
-Database:  "MongoDB" (NoSQL)
-
-
-
-
-
-
-3. DEPLOY:
-
- Το project έγινε deploy κάνοντας χρήση:
-
-
-
-Frontend: "Github Pages" μέσω Angular
-
-Backend:   "Render"
-
-           Test backend με "Jest"
- 
-           Backend Documentation με "Swagger"
-
-
-
-4. IMPORTANT INFO!!!!  FOR ADMIN USER!!!
-
-ADMINISTRATOR CREDENTIALS:
-
-   USERNAME: administrator
-   PASSWORD: 123456
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
+**ΠΡΟΣΟΧΗ:** Αυτά τα διαπιστευτήρια είναι για διαχειριστική πρόσβαση
